@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta de Local de Votação</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f4f4f4; }
+  h1 { color: #333; text-align: center; font-size: 22px; }
+  label { display: block; margin-top: 15px; font-weight: bold; }
+  input { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+  button { width: 100%; padding: 12px; margin-top: 20px; background: #0066cc; color: #fff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+  button:hover { background: #0055aa; }
+  #resultado { margin-top: 25px; padding: 15px; background: #fff; border-radius: 8px; display: none; }
+  #resultado p { margin: 8px 0; }
+  .erro { color: #c00; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<h1>Consulta de Local de Votação</h1>
+
+<label>Zona Antiga:</label>
+<input type="number" id="zonaAntiga" placeholder="Ex: 100">
+
+<label>Seção Antiga:</label>
+<input type="number" id="secaoAntiga" placeholder="Ex: 45">
+
+<button onclick="consultar()">Consultar</button>
+
+<div id="resultado"></div>
+
+<script>
+const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
+
+let D	ados = [];
+
+fetch(URL_CSV)
+  .then(r => r.text())
+  .then(texto => {
+    const linhas = texto.split("\n");
+    const cabecalho = linhas[0].split(",");
+    for (let i = 1; i < linhas.length; i++) {
+      const colunas = linhas[i].split(",");
+      if (colunas.length < 6) continue;
+      dados.push({
+        zonaAntiga: colunas[0].trim(),
+        secaoAntiga: colunas[1].trim(),
+        zonaNova: colunas[2].trim(),
+        secaoNova: colunas[3].trim(),
+        local: colunas[4].trim(),
+        endereco: colunas[5].trim()
+      });
+    }
+  })
+  .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
+
+function consultar() {
+  const z = document.getElementById("zonaAntiga").value.trim();
+  const s = document.getElementById("secaoAntiga").value.trim();
+  const div = document.getElementById("resultado");
+  div.style.display = "block";
+
+  if (!z || !s) {
+    div.innerHTML = '<p class="erro">Preencha a zona e a seção.</p>';
+    return;
+  }
+
+  const achou = dados.find(d => d.zonaAntiga === z && d.secaoAntiga === s);
+
+  if (achou) {
+    div.innerHTML = `
+      <p><strong>Zona Nova:</strong> ${achou.zonaNova}</p>
+      <p><strong>Seção Nova:</strong> ${achou.secaoNova}</p>
+      <p><strong>Local:</strong> ${achou.local}</p>
+      <p><strong>Endereço:</strong> ${achou.endereco}</p>
+    `;
+  } else {
+    div.innerHTML = '<p class="erro">Nenhuma correspondência encontrada. Confira os números digitados.</p>';
+  }
+}
+</script>
+
+</body>
+</html>
