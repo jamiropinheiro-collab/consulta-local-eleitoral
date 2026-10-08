@@ -23,9 +23,13 @@
   #resultado { margin-top: 25px; }
   .item { padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 10px; }
   .item p { margin: 6px 0; }
-  .titulo-item { font-weight: bold; color: #0066cc; margin-bottom: 8px; }
+  .titulo-item { font-weight: bold; margin-bottom: 8px; }
+  /* Sem alteração (verde) */
   .sem-alteracao { background: #e6f4ea; border-left: 4px solid #34a853; }
   .sem-alteracao .titulo-item { color: #1e7e34; }
+  /* Com alteração (amarelo) */
+  .com-alteracao { background: #fff8e1; border-left: 4px solid #f9a825; }
+  .com-alteracao .titulo-item { color: #b26a00; }
   .erro { color: #c00; font-weight: bold; padding: 15px; background: #fff; border-radius: 8px; }
   hr { border: none; border-top: 2px dashed #ccc; margin: 35px 0; }
   .secao-titulo { font-size: 16px; color: #0066cc; font-weight: bold; text-align: center; margin-bottom: 10px; }
@@ -132,7 +136,8 @@ function consultar() {
       `;
     } else {
       div.innerHTML = `
-        <div class="item">
+        <div class="item com-alteracao">
+          <p class="titulo-item">⚠️ Atenção! A numeração de sua zona e seção sofreu alteração.</p>
           <p><strong>Zona Nova:</strong> ${a.zonaNova}</p>
           <p><strong>Seção Nova:</strong> ${a.secaoNova}</p>
           <p><strong>Local:</strong> ${a.local}</p>
@@ -154,8 +159,8 @@ function consultar() {
         `;
       } else {
         html += `
-          <div class="item">
-            <p class="titulo-item">Seção Antiga ${a.secaoAntiga} → Seção Nova ${a.secaoNova} (Zona ${a.zonaNova})</p>
+          <div class="item com-alteracao">
+            <p class="titulo-item">⚠️ Seção Antiga ${a.secaoAntiga} → Seção Nova ${a.secaoNova} (Zona ${a.zonaNova})</p>
             <p><strong>Local:</strong> ${a.local}</p>
             <p><strong>Endereço:</strong> ${a.endereco}</p>
           </div>
@@ -167,12 +172,10 @@ function consultar() {
 }
 
 function limpar() {
-  // Limpa a consulta de cima (zona/seção)
   document.getElementById("zonaAntiga").value = "";
   document.getElementById("secaoAntiga").value = "";
   document.getElementById("resultado").innerHTML = "";
 
-  // Limpa a consulta de baixo (zona nova / local)
   document.getElementById("zonaNovaSelect").value = "";
   document.getElementById("resultadoLocal").innerHTML = "";
 
@@ -229,7 +232,6 @@ function mostrarSecoes(nomeLocal, zona) {
 
   const endereco = registros[0].endereco;
 
-  // Pega apenas seções ÚNICAS (sem repetir)
   const secoesUnicas = [...new Set(registros.map(r => r.secaoNova))]
     .sort((a, b) => Number(a) - Number(b));
 
