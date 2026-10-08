@@ -167,9 +167,15 @@ function consultar() {
 }
 
 function limpar() {
+  // Limpa a consulta de cima (zona/seção antiga)
   document.getElementById("zonaAntiga").value = "";
   document.getElementById("secaoAntiga").value = "";
   document.getElementById("resultado").innerHTML = "";
+
+  // Limpa a consulta de baixo (zona nova / local)
+  document.getElementById("zonaNovaSelect").value = "";
+  document.getElementById("resultadoLocal").innerHTML = "";
+
   document.getElementById("zonaAntiga").focus();
 }
 
