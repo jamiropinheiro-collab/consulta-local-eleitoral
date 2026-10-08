@@ -33,7 +33,7 @@
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
 
-let D	ados = [];
+let Dados = [];
 
 fetch(URL_CSV)
   .then(r => r.text())
@@ -43,7 +43,7 @@ fetch(URL_CSV)
     for (let i = 1; i < linhas.length; i++) {
       const colunas = linhas[i].split(",");
       if (colunas.length < 6) continue;
-      dados.push({
+      Dados.push({
         zonaAntiga: colunas[0].trim(),
         secaoAntiga: colunas[1].trim(),
         zonaNova: colunas[2].trim(),
