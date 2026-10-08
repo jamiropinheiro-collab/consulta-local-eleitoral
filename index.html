@@ -1,3 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consulta de Local de Votação — Eleições 2026</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f4f4f4; }
+  .cabecalho { text-align: center; margin-bottom: 25px; }
+  .eleicao { display: inline-block; background: #0066cc; color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; letter-spacing: 1px; margin-bottom: 15px; }
+  h1 { color: #333; font-size: 20px; margin: 10px 0 5px; }
+  .subtitulo { color: #666; font-size: 14px; margin: 0; }
+  label { display: block; margin-top: 15px; font-weight: bold; }
+  input { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+  select { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
+  .dica { font-size: 12px; color: #666; font-weight: normal; }
+  .botoes { display: flex; gap: 10px; margin-top: 20px; }
+  button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+  #btnConsultar { background: #0066cc; color: #fff; }
+  #btnConsultar:hover { background: #0055aa; }
+  #btnLimpar { background: #e0e0e0; color: #333; }
+  #btnLimpar:hover { background: #cccccc; }
+  #resultado { margin-top: 25px; }
+  .item { padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 10px; }
+  .item p { margin: 6px 0; }
+  .titulo-item { font-weight: bold; color: #0066cc; margin-bottom: 8px; }
+  .sem-alteracao { background: #e6f4ea; border-left: 4px solid #34a853; }
+  .sem-alteracao .titulo-item { color: #1e7e34; }
+  .erro { color: #c00; font-weight: bold; padding: 15px; background: #fff; border-radius: 8px; }
+  hr { border: none; border-top: 2px dashed #ccc; margin: 35px 0; }
+  .secao-titulo { font-size: 16px; color: #0066cc; font-weight: bold; text-align: center; margin-bottom: 10px; }
+  .local-botao { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; cursor: pointer; color: #333; }
+  .local-botao:hover { background: #eef4ff; border-color: #0066cc; }
+  .local-titulo { font-weight: bold; color: #0066cc; margin-bottom: 8px; }
+  .local-endereco { color: #555; font-size: 14px; margin-bottom: 10px; }
+  .secoes-lista { display: flex; flex-wrap: wrap; gap: 6px; }
+  .secao-tag { background: #eef4ff; color: #0066cc; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="cabecalho">
+  <span class="eleicao">ELEIÇÕES 2026</span>
+  <h1>Consulta de Local de Votação</h1>
+  <p class="subtitulo">Correspondência de zona e seção eleitoral</p>
+</div>
+
+<label>Zona Antiga:</label>
+<input type="number" id="zonaAntiga" placeholder="Ex: 100">
+
+<label>Seção Antiga: <span class="dica">(opcional)</span></label>
+<input type="number" id="secaoAntiga" placeholder="Ex: 45">
+
+<div class="botoes">
+  <button id="btnConsultar" onclick="consultar()">Consultar</button>
+  <button id="btnLimpar" onclick="limpar()">Limpar</button>
+</div>
+
+<div id="resultado"></div>
+
+<hr>
+
+<div class="secao-titulo">🔎 Consulta por Local (Zona Nova)</div>
+
+<label>Zona Nova:</label>
+<select id="zonaNovaSelect" onchange="mostrarLocais()">
+  <option value="">-- Selecione uma zona --</option>
+</select>
+
+<div id="resultadoLocal" style="margin-top: 20px;"></div>
+
+<script>
+const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
+
+let dados = [];
+
+fetch(URL_CSV)
+  .then(r => r.text())
+  .then(texto => {
+    const linhas = texto.split("\n");
+    for (let i = 1; i < linhas.length; i++) {
+      const colunas = linhas[i].split(",");
+      if (colunas.length < 6) continue;
+      dados.push({
+        zonaAntiga: colunas[0].trim(),
+        secaoAntiga: colunas[1].trim(),
+        zonaNova: colunas[2].trim(),
+        secaoNova: colunas[3].trim(),
+        local: colunas[4].trim(),
+        endereco: colunas[5].trim()
+      });
+    }
+    preencherZonasNovas();
+  })
+  .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
+
+// ---------- Consulta 1: por zona/seção antiga ----------
+function consultar() {
+  const z = document.getElementById("zonaAntiga").value.trim();
+  const s = document.getElementById("secaoAntiga").value.trim();
+  const div = document.getElementById("resultado");
+
+  if (!z) {
+    div.innerHTML = '<p class="erro">Preencha pelo menos a Zona.</p>';
+    return;
+  }
+
+  let achados;
+  if (s) {
+    achados = dados.filter(d => d.zonaAntiga === z && d.secaoAntiga === s);
+  } else {
+    achados = dados.filter(d => d.zonaAntiga === z);
+  }
+
+  if (achados.length === 0) {
+    div.innerHTML = '<p class="erro">Nenhuma correspondência encontrada. Confira os números digitados.</p>';
+    return;
+  }
+
+  if (s) {
+    const a = achados[0];
+    const semAlteracao = (a.zonaAntiga === a.zonaNova && a.secaoAntiga === a.secaoNova);
+    if (semAlteracao) {
+      div.innerHTML = `
+        <div class="item sem-alteracao">
+          <p class="titulo-item">✅ Sua seção não sofreu alteração.</p>
+          <p><strong>Zona:</strong> ${a.zonaAntiga}</p>
+          <p><strong>Seção:</strong> ${a.secaoAntiga}</p>
+          <p><strong>Local:</strong> ${a.local}</p>
+          <p><strong>Endereço:</strong> ${a.endereco}</p>
+        </div>
+      `;
+    } else {
+      div.innerHTML = `
+        <div class="item">
+          <p><strong>Zona Nova:</strong> ${a.zonaNova}</p>
+          <p><strong>Seção Nova:</strong> ${a.secaoNova}</p>
+          <p><strong>Local:</strong> ${a.local}</p>
+          <p><strong>Endereço:</strong> ${a.endereco}</p>
+        </div>
+      `;
+    }
+  } else {
+    let html = `<p style="font-weight:bold;">Encontradas ${achados.length} seções na zona ${z}:</p>`;
+    achados.forEach(a => {
+      const semAlteracao = (a.zonaAntiga === a.zonaNova && a.secaoAntiga === a.secaoNova);
+      if (semAlteracao) {
+        html += `
+          <div class="item sem-alteracao">
+            <p class="titulo-item">✅ Seção ${a.secaoAntiga} — não sofreu alteração</p>
+            <p><strong>Local:</strong> ${a.local}</p>
+            <p><strong>Endereço:</strong> ${a.endereco}</p>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="item">
+            <p class="titulo-item">Seção Antiga ${a.secaoAntiga} → Seção Nova ${a.secaoNova} (Zona ${a.zonaNova})</p>
+            <p><strong>Local:</strong> ${a.local}</p>
+            <p><strong>Endereço:</strong> ${a.endereco}</p>
+          </div>
+        `;
+      }
+    });
+    div.innerHTML = html;
+  }
+}
+
+function limpar() {
+  document.getElementById("zonaAntiga").value = "";
+  document.getElementById("secaoAntiga").value = "";
+  document.getElementById("resultado").innerHTML = "";
+  document.getElementById("zonaAntiga").focus();
+}
+
+// ---------- Consulta 2: por zona nova → local → seções ----------
+function preencherZonasNovas() {
+  const zonas = [...new Set(dados.map(d => d.zonaNova))].sort((a, b) => Number(a) - Number(b));
+  const select = document.getElementById("zonaNovaSelect");
+  zonas.forEach(z => {
+    const opt = document.createElement("option");
+    opt.value = z;
+    opt.textContent = "Zona " + z;
+    select.appendChild(opt);
+  });
+}
+
+function mostrarLocais() {
+  const z = document.getElementById("zonaNovaSelect").value;
+  const div = document.getElementById("resultadoLocal");
+  if (!z) { div.innerHTML = ""; return; }
+
+  const locais = {};
+  dados.filter(d => d.zonaNova === z).forEach(d => {
+    if (!locais[d.local]) {
+      locais[d.local] = { endereco: d.endereco, secoes: [] };
+    }
+    locais[d.local].secoes.push(d.secaoNova);
+  });
+
+  const nomesLocais = Object.keys(locais).sort();
+
+  if (nomesLocais.length === 0) {
+    div.innerHTML = '<p class="erro">Nenhum local encontrado para essa zona.</p>';
+    return;
+  }
+
+  let html = `<p style="font-weight:bold;">Locais de votação da zona ${z}:</p>`;
+  nomesLocais.forEach(nome => {
+    html += `<button class="local-botao" onclick="mostrarSecoes('${nome.replace(/'/g, "\\'")}', '${z}')">📍 ${nome}</button>`;
+  });
+  div.innerHTML = html;
+}
+
 function mostrarSecoes(nomeLocal, zona) {
   const div = document.getElementById("resultadoLocal");
   const registros = dados.filter(d => d.zonaNova === zona && d.local === nomeLocal);
@@ -27,3 +241,7 @@ function mostrarSecoes(nomeLocal, zona) {
   `;
   div.innerHTML = html;
 }
+</script>
+
+</body>
+</html>
