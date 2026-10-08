@@ -9,15 +9,20 @@
   h1 { color: #333; text-align: center; font-size: 22px; }
   label { display: block; margin-top: 15px; font-weight: bold; }
   input { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+  .dica { font-size: 12px; color: #666; font-weight: normal; }
   .botoes { display: flex; gap: 10px; margin-top: 20px; }
   button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
   #btnConsultar { background: #0066cc; color: #fff; }
   #btnConsultar:hover { background: #0055aa; }
   #btnLimpar { background: #e0e0e0; color: #333; }
   #btnLimpar:hover { background: #cccccc; }
-  #resultado { margin-top: 25px; padding: 15px; background: #fff; border-radius: 8px; display: none; }
-  #resultado p { margin: 8px 0; }
-  .erro { color: #c00; font-weight: bold; }
+  #resultado { margin-top: 25px; }
+  .item { padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 10px; }
+  .item p { margin: 6px 0; }
+  .titulo-item { font-weight: bold; color: #0066cc; margin-bottom: 8px; }
+  .sem-alteracao { background: #e6f4ea; border-left: 4px solid #34a853; }
+  .sem-alteracao .titulo-item { color: #1e7e34; }
+  .erro { color: #c00; font-weight: bold; padding: 15px; background: #fff; border-radius: 8px; }
 </style>
 </head>
 <body>
@@ -27,7 +32,7 @@
 <label>Zona Antiga:</label>
 <input type="number" id="zonaAntiga" placeholder="Ex: 100">
 
-<label>Seção Antiga:</label>
+<label>Seção Antiga: <span class="dica">(opcional)</span></label>
 <input type="number" id="secaoAntiga" placeholder="Ex: 45">
 
 <div class="botoes">
@@ -46,7 +51,6 @@ fetch(URL_CSV)
   .then(r => r.text())
   .then(texto => {
     const linhas = texto.split("\n");
-    const cabecalho = linhas[0].split(",");
     for (let i = 1; i < linhas.length; i++) {
       const colunas = linhas[i].split(",");
       if (colunas.length < 6) continue;
@@ -66,24 +70,74 @@ function consultar() {
   const z = document.getElementById("zonaAntiga").value.trim();
   const s = document.getElementById("secaoAntiga").value.trim();
   const div = document.getElementById("resultado");
-  div.style.display = "block";
 
-  if (!z || !s) {
-    div.innerHTML = '<p class="erro">Preencha a zona e a seção.</p>';
+  if (!z) {
+    div.innerHTML = '<p class="erro">Preencha pelo menos a Zona.</p>';
     return;
   }
 
-  const achou = dados.find(d => d.zonaAntiga === z && d.secaoAntiga === s);
+  let achados;
 
-  if (achou) {
-    div.innerHTML = `
-      <p><strong>Zona Nova:</strong> ${achou.zonaNova}</p>
-      <p><strong>Seção Nova:</strong> ${achou.secaoNova}</p>
-      <p><strong>Local:</strong> ${achou.local}</p>
-      <p><strong>Endereço:</strong> ${achou.endereco}</p>
-    `;
+  if (s) {
+    achados = dados.filter(d => d.zonaAntiga === z && d.secaoAntiga === s);
   } else {
+    achados = dados.filter(d => d.zonaAntiga === z);
+  }
+
+  if (achados.length === 0) {
     div.innerHTML = '<p class="erro">Nenhuma correspondência encontrada. Confira os números digitados.</p>';
+    return;
+  }
+
+  if (s) {
+    // Resultado único
+    const a = achados[0];
+    const semAlteracao = (a.zonaAntiga === a.zonaNova && a.secaoAntiga === a.secaoNova);
+
+    if (semAlteracao) {
+      div.innerHTML = `
+        <div class="item sem-alteracao">
+          <p class="titulo-item">✅ Sua seção não sofreu alteração.</p>
+          <p><strong>Zona:</strong> ${a.zonaAntiga}</p>
+          <p><strong>Seção:</strong> ${a.secaoAntiga}</p>
+          <p><strong>Local:</strong> ${a.local}</p>
+          <p><strong>Endereço:</strong> ${a.endereco}</p>
+        </div>
+      `;
+    } else {
+      div.innerHTML = `
+        <div class="item">
+          <p><strong>Zona Nova:</strong> ${a.zonaNova}</p>
+          <p><strong>Seção Nova:</strong> ${a.secaoNova}</p>
+          <p><strong>Local:</strong> ${a.local}</p>
+          <p><strong>Endereço:</strong> ${a.endereco}</p>
+        </div>
+      `;
+    }
+  } else {
+    // Vários resultados (busca só por zona)
+    let html = `<p style="font-weight:bold;">Encontradas ${achados.length} seções na zona ${z}:</p>`;
+    achados.forEach(a => {
+      const semAlteracao = (a.zonaAntiga === a.zonaNova && a.secaoAntiga === a.secaoNova);
+      if (semAlteracao) {
+        html += `
+          <div class="item sem-alteracao">
+            <p class="titulo-item">✅ Seção ${a.secaoAntiga} — não sofreu alteração</p>
+            <p><strong>Local:</strong> ${a.local}</p>
+            <p><strong>Endereço:</strong> ${a.endereco}</p>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="item">
+            <p class="titulo-item">Seção Antiga ${a.secaoAntiga} → Seção Nova ${a.secaoNova} (Zona ${a.zonaNova})</p>
+            <p><strong>Local:</strong> ${a.local}</p>
+            <p><strong>Endereço:</strong> ${a.endereco}</p>
+          </div>
+        `;
+      }
+    });
+    div.innerHTML = html;
   }
 }
 
@@ -92,7 +146,6 @@ function limpar() {
   document.getElementById("secaoAntiga").value = "";
   const div = document.getElementById("resultado");
   div.innerHTML = "";
-  div.style.display = "none";
   document.getElementById("zonaAntiga").focus();
 }
 </script>
