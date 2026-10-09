@@ -5,8 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Consulta de Local de Votação — Eleições 2026</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background: #f4f4f4; }
-  .cabecalho { text-align: center; margin-bottom: 25px; }
+  body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; padding: 15px; background: #f4f4f4; }
+
+  /* Blocos com cores suaves */
+  .bloco { padding: 15px; border-radius: 12px; margin-bottom: 15px; }
+  .bloco-principal { background: #eaf2fb; border: 1px solid #c5dbf3; }
+  .bloco-zona { background: #eef7ee; border: 1px solid #c8e6c9; }
+  .bloco-bairro { background: #fdf3e7; border: 1px solid #f5ddb8; }
+
+  .cabecalho { text-align: center; margin-bottom: 20px; }
   .eleicao { display: inline-block; background: #0066cc; color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; letter-spacing: 1px; margin-bottom: 15px; }
   h1 { color: #333; font-size: 20px; margin: 10px 0 5px; }
   .subtitulo { color: #666; font-size: 14px; margin: 0; }
@@ -19,7 +26,7 @@
   #btnConsultar:hover { background: #0055aa; }
   #btnLimpar { background: #e0e0e0; color: #333; }
   #btnLimpar:hover { background: #cccccc; }
-  #resultado { margin-top: 25px; }
+  #resultado { margin-top: 20px; }
   .item { padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 10px; }
   .item p { margin: 6px 0; }
   .titulo-item { font-weight: bold; margin-bottom: 8px; }
@@ -28,8 +35,30 @@
   .com-alteracao { background: #fff8e1; border-left: 4px solid #f9a825; }
   .com-alteracao .titulo-item { color: #b26a00; }
   .erro { color: #c00; font-weight: bold; padding: 15px; background: #fff; border-radius: 8px; }
-  hr { border: none; border-top: 2px dashed #ccc; margin: 35px 0; }
-  .secao-titulo { font-size: 16px; color: #0066cc; font-weight: bold; text-align: center; margin-bottom: 10px; }
+
+  /* Títulos clicáveis */
+  .secao-titulo {
+    font-size: 16px;
+    color: #0066cc;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    padding: 12px;
+    background: #dbe9f8;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .secao-titulo:hover { background: #c5dbf3; }
+  .secao-titulo .seta { font-size: 12px; transition: transform 0.2s; }
+  .secao-titulo.aberto .seta { transform: rotate(180deg); }
+
+  .secao-conteudo { display: none; margin-top: 15px; }
+  .secao-conteudo.aberto { display: block; }
+
   .local-botao { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; cursor: pointer; color: #333; }
   .local-botao:hover { background: #eef4ff; border-color: #0066cc; }
   .local-titulo { font-weight: bold; color: #0066cc; margin-bottom: 8px; }
@@ -40,66 +69,16 @@
   .bairro-botao:hover { background: #ccd9f0; }
   .bairro-titulo { font-weight: bold; color: #333; font-size: 15px; padding: 8px 12px; background: #dde7f7; border-radius: 6px; margin-bottom: 10px; }
 
-  .chips-container {
-    margin-top: 10px;
-    padding: 12px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    max-height: 220px;
-    overflow-y: auto;
-  }
-  .chips-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .chip-zona {
-    padding: 8px 14px;
-    background: #eef4ff;
-    color: #0066cc;
-    border: 2px solid transparent;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
-  .chip-zona:hover {
-    background: #d9e7ff;
-    border-color: #0066cc;
-  }
-  .chip-zona.selecionado {
-    background: #0066cc;
-    color: #fff;
-  }
-  .chip-vazio {
-    padding: 15px;
-    text-align: center;
-    color: #999;
-    font-style: italic;
-  }
-  .chip-bairro {
-    padding: 8px 14px;
-    background: #f0e8dd;
-    color: #7a5c2e;
-    border: 2px solid transparent;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
-  .chip-bairro:hover {
-    background: #e5d8c5;
-    border-color: #a07840;
-  }
-  .chip-bairro.selecionado {
-    background: #a07840;
-    color: #fff;
-  }
+  /* Chips */
+  .chips-container { margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; max-height: 200px; overflow-y: auto; }
+  .chips-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-zona { padding: 8px 14px; background: #eef4ff; color: #0066cc; border: 2px solid transparent; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .chip-zona:hover { background: #d9e7ff; border-color: #0066cc; }
+  .chip-zona.selecionado { background: #0066cc; color: #fff; }
+  .chip-vazio { padding: 15px; text-align: center; color: #999; font-style: italic; }
+  .chip-bairro { padding: 8px 14px; background: #f0e8dd; color: #7a5c2e; border: 2px solid transparent; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .chip-bairro:hover { background: #e5d8c5; border-color: #a07840; }
+  .chip-bairro.selecionado { background: #a07840; color: #fff; }
 </style>
 </head>
 <body>
@@ -110,42 +89,49 @@
   <p class="subtitulo">Correspondência de zona e seção eleitoral</p>
 </div>
 
-<label>Zona:</label>
-<input type="text" inputmode="numeric" id="zonaAntiga" placeholder="Ex: 100">
+<!-- BLOCO 1: Busca principal (azul) -->
+<div class="bloco bloco-principal">
+  <label>Zona:</label>
+  <input type="text" inputmode="numeric" id="zonaAntiga" placeholder="Ex: 100">
 
-<label>Seção: <span class="dica">(opcional)</span></label>
-<input type="text" inputmode="numeric" id="secaoAntiga" placeholder="Ex: 45">
+  <label>Seção: <span class="dica">(opcional)</span></label>
+  <input type="text" inputmode="numeric" id="secaoAntiga" placeholder="Ex: 45">
 
-<div class="botoes">
-  <button id="btnConsultar" onclick="consultar()">Consultar</button>
-  <button id="btnLimpar" onclick="limpar()">Limpar</button>
+  <div class="botoes">
+    <button id="btnConsultar" onclick="consultar()">Consultar</button>
+    <button id="btnLimpar" onclick="limpar()">Limpar</button>
+  </div>
+
+  <div id="resultado"></div>
 </div>
 
-<div id="resultado"></div>
-
-<hr>
-
-<div class="secao-titulo">🔎 Consulta por Zona</div>
-
-<label>Zona: <span class="dica" id="contadorZonas"></span></label>
-
-<div class="chips-container" id="chipsContainer">
-  <div class="chip-vazio">Carregando zonas...</div>
+<!-- BLOCO 2: Consulta por Zona (verde) -->
+<div class="bloco bloco-zona">
+  <div class="secao-titulo" id="tituloZona" onclick="toggleSecao('zona')">
+    <span>🔎 Consulta por Zona</span>
+    <span class="seta">▼</span>
+  </div>
+  <div class="secao-conteudo" id="conteudoZona">
+    <div class="chips-container" id="chipsContainer">
+      <div class="chip-vazio">Carregando zonas...</div>
+    </div>
+    <div id="resultadoLocal" style="margin-top: 20px;"></div>
+  </div>
 </div>
 
-<div id="resultadoLocal" style="margin-top: 20px;"></div>
-
-<hr>
-
-<div class="secao-titulo">🔎 Consulta por Bairro</div>
-
-<label>Bairro: <span class="dica" id="contadorBairros"></span></label>
-
-<div class="chips-container" id="chipsBairrosContainer">
-  <div class="chip-vazio">Carregando bairros...</div>
+<!-- BLOCO 3: Consulta por Bairro (bege) -->
+<div class="bloco bloco-bairro">
+  <div class="secao-titulo" id="tituloBairro" onclick="toggleSecao('bairro')" style="background: #f5ddb8; color: #7a5c2e;">
+    <span>🔎 Consulta por Bairro</span>
+    <span class="seta">▼</span>
+  </div>
+  <div class="secao-conteudo" id="conteudoBairro">
+    <div class="chips-container" id="chipsBairrosContainer">
+      <div class="chip-vazio">Carregando bairros...</div>
+    </div>
+    <div id="resultadoBairro" style="margin-top: 20px;"></div>
+  </div>
 </div>
-
-<div id="resultadoBairro" style="margin-top: 20px;"></div>
 
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
@@ -219,6 +205,14 @@ function extrairBairro(endereco) {
   return "Outros";
 }
 
+// Alterna a abertura das seções
+function toggleSecao(qual) {
+  const conteudo = document.getElementById(qual === "zona" ? "conteudoZona" : "conteudoBairro");
+  const titulo = document.getElementById(qual === "zona" ? "tituloZona" : "tituloBairro");
+  conteudo.classList.toggle("aberto");
+  titulo.classList.toggle("aberto");
+}
+
 fetch(URL_CSV)
   .then(r => r.text())
   .then(texto => {
@@ -239,11 +233,9 @@ fetch(URL_CSV)
     }
     zonasDisponiveis = [...new Set(dados.map(d => d.zonaNova))]
       .sort((a, b) => Number(a) - Number(b));
-    document.getElementById("contadorZonas").textContent = `(${zonasDisponiveis.length} disponíveis)`;
 
     bairrosDisponiveis = [...new Set(dados.map(d => d.bairro))]
       .sort((a, b) => a.localeCompare(b, "pt-BR"));
-    document.getElementById("contadorBairros").textContent = `(${bairrosDisponiveis.length} disponíveis)`;
 
     renderizarChips();
     renderizarChipsBairros();
@@ -488,7 +480,6 @@ function mostrarLocaisDoBairroConsulta(bairro) {
     return;
   }
 
-  // Agrupa por zona → local (chave composta zona|local para separar)
   const porZona = {};
   registros.forEach(d => {
     if (!porZona[d.zonaNova]) porZona[d.zonaNova] = {};
