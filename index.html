@@ -24,10 +24,8 @@
   .item { padding: 15px; background: #fff; border-radius: 8px; margin-bottom: 10px; }
   .item p { margin: 6px 0; }
   .titulo-item { font-weight: bold; margin-bottom: 8px; }
-  /* Sem alteração (verde) */
   .sem-alteracao { background: #e6f4ea; border-left: 4px solid #34a853; }
   .sem-alteracao .titulo-item { color: #1e7e34; }
-  /* Com alteração (amarelo) */
   .com-alteracao { background: #fff8e1; border-left: 4px solid #f9a825; }
   .com-alteracao .titulo-item { color: #b26a00; }
   .erro { color: #c00; font-weight: bold; padding: 15px; background: #fff; border-radius: 8px; }
@@ -39,6 +37,9 @@
   .local-endereco { color: #555; font-size: 14px; margin-bottom: 10px; }
   .secoes-lista { display: flex; flex-wrap: wrap; gap: 6px; }
   .secao-tag { background: #eef4ff; color: #0066cc; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; }
+  /* Agrupamento por bairro */
+  .bairro-grupo { margin-top: 20px; }
+  .bairro-titulo { font-weight: bold; color: #333; font-size: 15px; padding: 8px 12px; background: #dde7f7; border-radius: 6px; margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -66,7 +67,7 @@
 
 <div class="secao-titulo">🔎 Consulta por Local</div>
 
-<label>Zona:</label>
+<label>Zona: <span class="dica" id="contadorZonas"></span></label>
 <select id="zonaNovaSelect" onchange="mostrarLocais()">
   <option value="">-- Selecione uma zona --</option>
 </select>
@@ -76,15 +77,78 @@
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
 
+// Lista de bairros do Rio de Janeiro (para agrupar)
+const BAIRROS = [
+  // Zona Central
+  "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
+  "Ilha de Paquetá", "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde",
+  // Zona Sul
+  "Botafogo", "Catete", "Copacabana", "Cosme Velho", "Flamengo", "Gávea",
+  "Humaitá", "Ipanema", "Jardim Botânico", "Lagoa", "Laranjeiras", "Leblon",
+  "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal",
+  // Zona Norte
+  "Abolição", "Acari", "Água Santa", "Alto da Boa Vista", "Anchieta", "Andaraí",
+  "Bancários", "Barros Filho", "Benfica", "Bento Ribeiro", "Bonsucesso",
+  "Brás de Pina", "Cachambi", "Cacuia", "Campinho", "Cascadura", "Cavalcanti",
+  "Cidade Universitária", "Cocotá", "Coelho Neto", "Colégio", "Complexo do Alemão",
+  "Cordovil", "Costa Barros", "Del Castilho", "Encantado", "Engenheiro Leal",
+  "Engenho da Rainha", "Engenho de Dentro", "Engenho Novo", "Freguesia",
+  "Galeão", "Grajaú", "Guadalupe", "Higienópolis", "Honório Gurgel", "Inhaúma",
+  "Irajá", "Jacaré", "Jacarezinho", "Jardim América", "Jardim Carioca",
+  "Jardim Guanabara", "Lins de Vasconcelos", "Madureira", "Mangueira",
+  "Manguinhos", "Maracanã", "Maré", "Marechal Hermes", "Maria da Graça",
+  "Méier", "Moneró", "Olaria", "Oswaldo Cruz", "Parada de Lucas",
+  "Parque Anchieta", "Parque Colúmbia", "Pavuna", "Penha", "Penha Circular",
+  "Piedade", "Pilares", "Pitangueiras", "Portuguesa", "Praça da Bandeira",
+  "Praia da Bandeira", "Quintino Bocaiúva", "Ramos", "Riachuelo", "Ribeira",
+  "Ricardo de Albuquerque", "Rocha", "Rocha Miranda", "Sampaio", "São Cristóvão",
+  "São Francisco Xavier", "Tauá", "Tijuca", "Todos os Santos", "Tomás Coelho",
+  "Turiaçu", "Vasco da Gama", "Vaz Lobo", "Vicente de Carvalho", "Vigário Geral",
+  "Vila da Penha", "Vila Isabel", "Vila Kosmos", "Vista Alegre", "Zumbi",
+  // Zona Oeste
+  "Bangu", "Barra de Guaratiba", "Campo dos Afonsos", "Campo Grande", "Cosmos",
+  "Deodoro", "Gericinó", "Guaratiba", "Ilha de Guaratiba", "Inhoaíba", "Jabour",
+  "Jardim Sulacap", "Magalhães Bastos", "Paciência", "Padre Miguel",
+  "Pedra de Guaratiba", "Realengo", "Santa Cruz", "Santíssimo", "Senador Camará",
+  "Senador Vasconcelos", "Sepetiba", "Vila Kennedy", "Vila Militar",
+  // Zona Sudoeste
+  "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
+  "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Jacarepaguá",
+  "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
+  "Recreio dos Bandeirantes", "Tanque", "Taquara", "Vargem Grande",
+  "Vargem Pequena", "Vila Valqueire"
+];
+
+// Ordena bairros do MAIOR para o MENOR (para casar "Ilha do Governador" antes de "Governador")
+const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
+
 let dados = [];
 
-// Remove espaços e zeros à esquerda (ex: " 017 " vira "17")
+// Remove espaços e zeros à esquerda
 function normalizar(valor) {
   const s = String(valor).trim();
   if (s === "") return "";
   const num = parseInt(s, 10);
   if (isNaN(num)) return s;
   return String(num);
+}
+
+// Remove acentos e deixa maiúsculo para comparar
+function simplificar(texto) {
+  return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+}
+
+// Descobre o bairro a partir do endereço
+function extrairBairro(endereco) {
+  const enderecoSimp = simplificar(endereco);
+  for (const bairro of BAIRROS_ORDENADOS) {
+    const bairroSimp = simplificar(bairro);
+    // Verifica se o endereço TERMINA com o nome do bairro
+    if (enderecoSimp.endsWith(bairroSimp)) {
+      return bairro;
+    }
+  }
+  return "Outros";
 }
 
 fetch(URL_CSV)
@@ -94,13 +158,15 @@ fetch(URL_CSV)
     for (let i = 1; i < linhas.length; i++) {
       const colunas = linhas[i].split(",");
       if (colunas.length < 6) continue;
+      const endereco = colunas[5].trim();
       dados.push({
         zonaAntiga: normalizar(colunas[0]),
         secaoAntiga: normalizar(colunas[1]),
         zonaNova: normalizar(colunas[2]),
         secaoNova: normalizar(colunas[3]),
         local: colunas[4].trim(),
-        endereco: colunas[5].trim()
+        endereco: endereco,
+        bairro: extrairBairro(endereco)
       });
     }
     preencherZonasNovas();
@@ -201,6 +267,7 @@ function preencherZonasNovas() {
     opt.textContent = "Zona " + z;
     select.appendChild(opt);
   });
+  document.getElementById("contadorZonas").textContent = `(${zonas.length} disponíveis)`;
 }
 
 function mostrarLocais() {
@@ -208,25 +275,40 @@ function mostrarLocais() {
   const div = document.getElementById("resultadoLocal");
   if (!z) { div.innerHTML = ""; return; }
 
-  const locais = {};
-  dados.filter(d => d.zonaNova === z).forEach(d => {
-    if (!locais[d.local]) {
-      locais[d.local] = { endereco: d.endereco, secoes: [] };
-    }
-    locais[d.local].secoes.push(d.secaoNova);
-  });
+  const registrosZona = dados.filter(d => d.zonaNova === z);
 
-  const nomesLocais = Object.keys(locais).sort();
-
-  if (nomesLocais.length === 0) {
+  if (registrosZona.length === 0) {
     div.innerHTML = '<p class="erro">Nenhum local encontrado para essa zona.</p>';
     return;
   }
 
-  let html = `<p style="font-weight:bold;">Locais de votação da zona ${z}:</p>`;
-  nomesLocais.forEach(nome => {
-    html += `<button class="local-botao" onclick="mostrarSecoes('${nome.replace(/'/g, "\\'")}', '${z}')">📍 ${nome}</button>`;
+  // Agrupa por bairro → local
+  const porBairro = {};
+  registrosZona.forEach(d => {
+    const b = d.bairro;
+    if (!porBairro[b]) porBairro[b] = {};
+    if (!porBairro[b][d.local]) {
+      porBairro[b][d.local] = { endereco: d.endereco, secoes: [] };
+    }
+    porBairro[b][d.local].secoes.push(d.secaoNova);
   });
+
+  const bairrosOrdenados = Object.keys(porBairro).sort();
+  let totalLocais = 0;
+  bairrosOrdenados.forEach(b => totalLocais += Object.keys(porBairro[b]).length);
+
+  let html = `<p style="font-weight:bold;">Zona ${z} — ${totalLocais} locais em ${bairrosOrdenados.length} bairros:</p>`;
+
+  bairrosOrdenados.forEach(bairro => {
+    const locais = Object.keys(porBairro[bairro]).sort();
+    html += `<div class="bairro-grupo">`;
+    html += `<div class="bairro-titulo">📍 ${bairro} (${locais.length} ${locais.length === 1 ? 'local' : 'locais'})</div>`;
+    locais.forEach(nome => {
+      html += `<button class="local-botao" onclick="mostrarSecoes('${nome.replace(/'/g, "\\'")}', '${z}')">${nome}</button>`;
+    });
+    html += `</div>`;
+  });
+
   div.innerHTML = html;
 }
 
@@ -240,6 +322,7 @@ function mostrarSecoes(nomeLocal, zona) {
   }
 
   const endereco = registros[0].endereco;
+  const bairro = registros[0].bairro;
 
   const secoesUnicas = [...new Set(registros.map(r => r.secaoNova))]
     .sort((a, b) => Number(a) - Number(b));
@@ -249,7 +332,7 @@ function mostrarSecoes(nomeLocal, zona) {
     <div class="item">
       <p class="local-titulo">📍 ${nomeLocal}</p>
       <p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p>
-      <p><strong>Zona:</strong> ${zona}</p>
+      <p><strong>Zona:</strong> ${zona} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p>
       <p><strong>Seções (${secoesUnicas.length}):</strong></p>
       <div class="secoes-lista">
         ${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}
