@@ -38,12 +38,48 @@
   .secao-tag { background: #eef4ff; color: #0066cc; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; }
   .bairro-botao { display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; background: #dde7f7; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; }
   .bairro-botao:hover { background: #ccd9f0; }
-  .busca-container { position: relative; }
-  .lista-zonas { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-top: none; border-radius: 0 0 6px 6px; max-height: 220px; overflow-y: auto; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-  .lista-zonas div { padding: 10px 12px; cursor: pointer; font-size: 15px; }
-  .lista-zonas div:hover { background: #eef4ff; color: #0066cc; }
-  .lista-zonas .sem-resultado { color: #999; cursor: default; font-style: italic; }
-  .lista-zonas .sem-resultado:hover { background: #fff; color: #999; }
+
+  /* Chips de zonas */
+  .chips-container {
+    margin-top: 10px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .chips-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip-zona {
+    padding: 8px 14px;
+    background: #eef4ff;
+    color: #0066cc;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .chip-zona:hover {
+    background: #d9e7ff;
+    border-color: #0066cc;
+  }
+  .chip-zona.selecionado {
+    background: #0066cc;
+    color: #fff;
+  }
+  .chip-vazio {
+    padding: 15px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+  }
 </style>
 </head>
 <body>
@@ -72,9 +108,11 @@
 <div class="secao-titulo">🔎 Consulta por Local</div>
 
 <label>Zona: <span class="dica" id="contadorZonas"></span></label>
-<div class="busca-container">
-  <input type="text" inputmode="numeric" id="zonaBusca" placeholder="Digite o número da zona" oninput="filtrarZonas()" onfocus="filtrarZonas()" autocomplete="off">
-  <div class="lista-zonas" id="listaZonas" style="display:none;"></div>
+
+<input type="text" inputmode="numeric" id="filtroZonas" placeholder="🔍 Digite para filtrar (opcional)" oninput="renderizarChips()" autocomplete="off">
+
+<div class="chips-container" id="chipsContainer">
+  <div class="chip-vazio">Carregando zonas...</div>
 </div>
 
 <div id="resultadoLocal" style="margin-top: 20px;"></div>
@@ -140,7 +178,6 @@ function extrairBairro(endereco) {
   const enderecoSimp = simplificar(endereco);
   for (const bairro of BAIRROS_ORDENADOS) {
     if (enderecoSimp.endsWith(simplificar(bairro))) {
-      // Padroniza variações para o nome oficial
       if (bairro === "Recreio") return "Recreio dos Bandeirantes";
       if (bairro === "Fátima") return "Bairro de Fátima";
       if (bairro === "Freguesia JPA") return "Freguesia de Jacarepaguá";
@@ -171,6 +208,7 @@ fetch(URL_CSV)
     zonasDisponiveis = [...new Set(dados.map(d => d.zonaNova))]
       .sort((a, b) => Number(a) - Number(b));
     document.getElementById("contadorZonas").textContent = `(${zonasDisponiveis.length} disponíveis)`;
+    renderizarChips();
   })
   .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
 
@@ -252,20 +290,18 @@ function limpar() {
   document.getElementById("secaoAntiga").value = "";
   document.getElementById("resultado").innerHTML = "";
 
-  document.getElementById("zonaBusca").value = "";
-  document.getElementById("listaZonas").style.display = "none";
+  document.getElementById("filtroZonas").value = "";
+  renderizarChips();
   document.getElementById("resultadoLocal").innerHTML = "";
   zonaSelecionada = "";
 
   document.getElementById("zonaAntiga").focus();
 }
 
-// ---------- Consulta 2: zona → bairro → local → seções ----------
-function filtrarZonas() {
-  const termo = document.getElementById("zonaBusca").value.trim();
-  const lista = document.getElementById("listaZonas");
-  lista.style.display = "block";
-
+// ---------- Consulta 2: chips de zona → bairro → local → seções ----------
+function renderizarChips() {
+  const container = document.getElementById("chipsContainer");
+  const termo = document.getElementById("filtroZonas").value.trim();
   const termoNorm = termo === "" ? "" : normalizar(termo);
 
   const filtradas = zonasDisponiveis.filter(z =>
@@ -273,25 +309,25 @@ function filtrarZonas() {
   );
 
   if (filtradas.length === 0) {
-    lista.innerHTML = '<div class="sem-resultado">Nenhuma zona encontrada</div>';
+    container.innerHTML = '<div class="chip-vazio">Nenhuma zona encontrada</div>';
     return;
   }
 
-  const mostrar = filtradas.slice(0, 20);
-  lista.innerHTML = mostrar.map(z =>
-    `<div onclick="selecionarZona('${z}')">Zona ${z}</div>`
-  ).join("");
+  let html = '<div class="chips-grid">';
+  filtradas.forEach(z => {
+    const classe = (z === zonaSelecionada) ? "chip-zona selecionado" : "chip-zona";
+    html += `<button class="${classe}" onclick="selecionarZona('${z}')">${z}</button>`;
+  });
+  html += '</div>';
 
-  if (filtradas.length > 20) {
-    lista.innerHTML += `<div class="sem-resultado">+ ${filtradas.length - 20} zonas (refine a busca)</div>`;
-  }
+  container.innerHTML = html;
 }
 
 function selecionarZona(z) {
   zonaSelecionada = z;
-  document.getElementById("zonaBusca").value = "Zona " + z;
-  document.getElementById("listaZonas").style.display = "none";
+  renderizarChips();
   mostrarBairros();
+  document.getElementById("resultadoLocal").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function mostrarBairros() {
@@ -383,13 +419,6 @@ function mostrarSecoes(nomeLocal) {
   `;
   div.innerHTML = html;
 }
-
-document.addEventListener("click", function(e) {
-  const container = document.querySelector(".busca-container");
-  if (container && !container.contains(e.target)) {
-    document.getElementById("listaZonas").style.display = "none";
-  }
-});
 </script>
 
 </body>
