@@ -36,10 +36,8 @@
   .local-endereco { color: #555; font-size: 14px; margin-bottom: 10px; }
   .secoes-lista { display: flex; flex-wrap: wrap; gap: 6px; }
   .secao-tag { background: #eef4ff; color: #0066cc; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; }
-  /* Bairros clicáveis */
   .bairro-botao { display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; background: #dde7f7; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; }
   .bairro-botao:hover { background: #ccd9f0; }
-  /* Campo de busca de zona */
   .busca-container { position: relative; }
   .lista-zonas { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-top: none; border-radius: 0 0 6px 6px; max-height: 220px; overflow-y: auto; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
   .lista-zonas div { padding: 10px 12px; cursor: pointer; font-size: 15px; }
@@ -116,7 +114,7 @@ const BAIRROS = [
   "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
   "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Jacarepaguá",
   "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
-  "Recreio dos Bandeirantes", "Tanque", "Taquara", "Vargem Grande",
+  "Recreio", "Recreio dos Bandeirantes", "Tanque", "Taquara", "Vargem Grande",
   "Vargem Pequena", "Vila Valqueire"
 ];
 
@@ -142,6 +140,8 @@ function extrairBairro(endereco) {
   const enderecoSimp = simplificar(endereco);
   for (const bairro of BAIRROS_ORDENADOS) {
     if (enderecoSimp.endsWith(simplificar(bairro))) {
+      // Padroniza "Recreio" para "Recreio dos Bandeirantes"
+      if (bairro === "Recreio") return "Recreio dos Bandeirantes";
       return bairro;
     }
   }
@@ -275,7 +275,6 @@ function filtrarZonas() {
     return;
   }
 
-  // Limita a 20 para não ficar gigante
   const mostrar = filtradas.slice(0, 20);
   lista.innerHTML = mostrar.map(z =>
     `<div onclick="selecionarZona('${z}')">Zona ${z}</div>`
@@ -383,7 +382,6 @@ function mostrarSecoes(nomeLocal) {
   div.innerHTML = html;
 }
 
-// Fecha a lista de zonas ao clicar fora
 document.addEventListener("click", function(e) {
   const container = document.querySelector(".busca-container");
   if (container && !container.contains(e.target)) {
