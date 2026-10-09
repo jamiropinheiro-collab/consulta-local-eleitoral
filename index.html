@@ -78,6 +78,15 @@ const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4W
 
 let dados = [];
 
+// Remove zeros à esquerda (ex: "017" vira "17", "000" vira "0")
+function normalizar(valor) {
+  const s = String(valor).trim();
+  if (s === "") return "";
+  const num = parseInt(s, 10);
+  if (isNaN(num)) return s;
+  return String(num);
+}
+
 fetch(URL_CSV)
   .then(r => r.text())
   .then(texto => {
@@ -86,10 +95,10 @@ fetch(URL_CSV)
       const colunas = linhas[i].split(",");
       if (colunas.length < 6) continue;
       dados.push({
-        zonaAntiga: colunas[0].trim(),
-        secaoAntiga: colunas[1].trim(),
-        zonaNova: colunas[2].trim(),
-        secaoNova: colunas[3].trim(),
+        zonaAntiga: normalizar(colunas[0]),
+        secaoAntiga: normalizar(colunas[1]),
+        zonaNova: normalizar(colunas[2]),
+        secaoNova: normalizar(colunas[3]),
         local: colunas[4].trim(),
         endereco: colunas[5].trim()
       });
@@ -100,8 +109,8 @@ fetch(URL_CSV)
 
 // ---------- Consulta 1: por zona/seção ----------
 function consultar() {
-  const z = document.getElementById("zonaAntiga").value.trim();
-  const s = document.getElementById("secaoAntiga").value.trim();
+  const z = normalizar(document.getElementById("zonaAntiga").value);
+  const s = normalizar(document.getElementById("secaoAntiga").value);
   const div = document.getElementById("resultado");
 
   if (!z) {
