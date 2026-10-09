@@ -12,7 +12,6 @@
   .subtitulo { color: #666; font-size: 14px; margin: 0; }
   label { display: block; margin-top: 15px; font-weight: bold; }
   input { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-  select { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
   .dica { font-size: 12px; color: #666; font-weight: normal; }
   .botoes { display: flex; gap: 10px; margin-top: 20px; }
   button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
@@ -37,9 +36,16 @@
   .local-endereco { color: #555; font-size: 14px; margin-bottom: 10px; }
   .secoes-lista { display: flex; flex-wrap: wrap; gap: 6px; }
   .secao-tag { background: #eef4ff; color: #0066cc; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; }
-  /* Agrupamento por bairro */
-  .bairro-grupo { margin-top: 20px; }
-  .bairro-titulo { font-weight: bold; color: #333; font-size: 15px; padding: 8px 12px; background: #dde7f7; border-radius: 6px; margin-bottom: 10px; }
+  /* Bairros clicáveis */
+  .bairro-botao { display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; background: #dde7f7; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; }
+  .bairro-botao:hover { background: #ccd9f0; }
+  /* Campo de busca de zona */
+  .busca-container { position: relative; }
+  .lista-zonas { position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-top: none; border-radius: 0 0 6px 6px; max-height: 220px; overflow-y: auto; z-index: 10; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+  .lista-zonas div { padding: 10px 12px; cursor: pointer; font-size: 15px; }
+  .lista-zonas div:hover { background: #eef4ff; color: #0066cc; }
+  .lista-zonas .sem-resultado { color: #999; cursor: default; font-style: italic; }
+  .lista-zonas .sem-resultado:hover { background: #fff; color: #999; }
 </style>
 </head>
 <body>
@@ -68,25 +74,22 @@
 <div class="secao-titulo">🔎 Consulta por Local</div>
 
 <label>Zona: <span class="dica" id="contadorZonas"></span></label>
-<select id="zonaNovaSelect" onchange="mostrarLocais()">
-  <option value="">-- Selecione uma zona --</option>
-</select>
+<div class="busca-container">
+  <input type="text" inputmode="numeric" id="zonaBusca" placeholder="Digite o número da zona" oninput="filtrarZonas()" onfocus="filtrarZonas()" autocomplete="off">
+  <div class="lista-zonas" id="listaZonas" style="display:none;"></div>
+</div>
 
 <div id="resultadoLocal" style="margin-top: 20px;"></div>
 
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
 
-// Lista de bairros do Rio de Janeiro (para agrupar)
 const BAIRROS = [
-  // Zona Central
   "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
   "Ilha de Paquetá", "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde",
-  // Zona Sul
   "Botafogo", "Catete", "Copacabana", "Cosme Velho", "Flamengo", "Gávea",
   "Humaitá", "Ipanema", "Jardim Botânico", "Lagoa", "Laranjeiras", "Leblon",
   "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal",
-  // Zona Norte
   "Abolição", "Acari", "Água Santa", "Alto da Boa Vista", "Anchieta", "Andaraí",
   "Bancários", "Barros Filho", "Benfica", "Bento Ribeiro", "Bonsucesso",
   "Brás de Pina", "Cachambi", "Cacuia", "Campinho", "Cascadura", "Cavalcanti",
@@ -105,13 +108,11 @@ const BAIRROS = [
   "São Francisco Xavier", "Tauá", "Tijuca", "Todos os Santos", "Tomás Coelho",
   "Turiaçu", "Vasco da Gama", "Vaz Lobo", "Vicente de Carvalho", "Vigário Geral",
   "Vila da Penha", "Vila Isabel", "Vila Kosmos", "Vista Alegre", "Zumbi",
-  // Zona Oeste
   "Bangu", "Barra de Guaratiba", "Campo dos Afonsos", "Campo Grande", "Cosmos",
   "Deodoro", "Gericinó", "Guaratiba", "Ilha de Guaratiba", "Inhoaíba", "Jabour",
   "Jardim Sulacap", "Magalhães Bastos", "Paciência", "Padre Miguel",
   "Pedra de Guaratiba", "Realengo", "Santa Cruz", "Santíssimo", "Senador Camará",
   "Senador Vasconcelos", "Sepetiba", "Vila Kennedy", "Vila Militar",
-  // Zona Sudoeste
   "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
   "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Jacarepaguá",
   "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
@@ -119,12 +120,12 @@ const BAIRROS = [
   "Vargem Pequena", "Vila Valqueire"
 ];
 
-// Ordena bairros do MAIOR para o MENOR (para casar "Ilha do Governador" antes de "Governador")
 const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
 
 let dados = [];
+let zonasDisponiveis = [];
+let zonaSelecionada = "";
 
-// Remove espaços e zeros à esquerda
 function normalizar(valor) {
   const s = String(valor).trim();
   if (s === "") return "";
@@ -133,18 +134,14 @@ function normalizar(valor) {
   return String(num);
 }
 
-// Remove acentos e deixa maiúsculo para comparar
 function simplificar(texto) {
   return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
 }
 
-// Descobre o bairro a partir do endereço
 function extrairBairro(endereco) {
   const enderecoSimp = simplificar(endereco);
   for (const bairro of BAIRROS_ORDENADOS) {
-    const bairroSimp = simplificar(bairro);
-    // Verifica se o endereço TERMINA com o nome do bairro
-    if (enderecoSimp.endsWith(bairroSimp)) {
+    if (enderecoSimp.endsWith(simplificar(bairro))) {
       return bairro;
     }
   }
@@ -169,7 +166,9 @@ fetch(URL_CSV)
         bairro: extrairBairro(endereco)
       });
     }
-    preencherZonasNovas();
+    zonasDisponiveis = [...new Set(dados.map(d => d.zonaNova))]
+      .sort((a, b) => Number(a) - Number(b));
+    document.getElementById("contadorZonas").textContent = `(${zonasDisponiveis.length} disponíveis)`;
   })
   .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
 
@@ -251,38 +250,59 @@ function limpar() {
   document.getElementById("secaoAntiga").value = "";
   document.getElementById("resultado").innerHTML = "";
 
-  document.getElementById("zonaNovaSelect").value = "";
+  document.getElementById("zonaBusca").value = "";
+  document.getElementById("listaZonas").style.display = "none";
   document.getElementById("resultadoLocal").innerHTML = "";
+  zonaSelecionada = "";
 
   document.getElementById("zonaAntiga").focus();
 }
 
-// ---------- Consulta 2: por zona nova → local → seções ----------
-function preencherZonasNovas() {
-  const zonas = [...new Set(dados.map(d => d.zonaNova))].sort((a, b) => Number(a) - Number(b));
-  const select = document.getElementById("zonaNovaSelect");
-  zonas.forEach(z => {
-    const opt = document.createElement("option");
-    opt.value = z;
-    opt.textContent = "Zona " + z;
-    select.appendChild(opt);
-  });
-  document.getElementById("contadorZonas").textContent = `(${zonas.length} disponíveis)`;
+// ---------- Consulta 2: zona → bairro → local → seções ----------
+function filtrarZonas() {
+  const termo = document.getElementById("zonaBusca").value.trim();
+  const lista = document.getElementById("listaZonas");
+  lista.style.display = "block";
+
+  const termoNorm = termo === "" ? "" : normalizar(termo);
+
+  const filtradas = zonasDisponiveis.filter(z =>
+    termoNorm === "" || z.startsWith(termoNorm)
+  );
+
+  if (filtradas.length === 0) {
+    lista.innerHTML = '<div class="sem-resultado">Nenhuma zona encontrada</div>';
+    return;
+  }
+
+  // Limita a 20 para não ficar gigante
+  const mostrar = filtradas.slice(0, 20);
+  lista.innerHTML = mostrar.map(z =>
+    `<div onclick="selecionarZona('${z}')">Zona ${z}</div>`
+  ).join("");
+
+  if (filtradas.length > 20) {
+    lista.innerHTML += `<div class="sem-resultado">+ ${filtradas.length - 20} zonas (refine a busca)</div>`;
+  }
 }
 
-function mostrarLocais() {
-  const z = document.getElementById("zonaNovaSelect").value;
+function selecionarZona(z) {
+  zonaSelecionada = z;
+  document.getElementById("zonaBusca").value = "Zona " + z;
+  document.getElementById("listaZonas").style.display = "none";
+  mostrarBairros();
+}
+
+function mostrarBairros() {
   const div = document.getElementById("resultadoLocal");
-  if (!z) { div.innerHTML = ""; return; }
+  if (!zonaSelecionada) { div.innerHTML = ""; return; }
 
-  const registrosZona = dados.filter(d => d.zonaNova === z);
-
+  const registrosZona = dados.filter(d => d.zonaNova === zonaSelecionada);
   if (registrosZona.length === 0) {
     div.innerHTML = '<p class="erro">Nenhum local encontrado para essa zona.</p>';
     return;
   }
 
-  // Agrupa por bairro → local
   const porBairro = {};
   registrosZona.forEach(d => {
     const b = d.bairro;
@@ -297,24 +317,45 @@ function mostrarLocais() {
   let totalLocais = 0;
   bairrosOrdenados.forEach(b => totalLocais += Object.keys(porBairro[b]).length);
 
-  let html = `<p style="font-weight:bold;">Zona ${z} — ${totalLocais} locais em ${bairrosOrdenados.length} bairros:</p>`;
+  let html = `<p style="font-weight:bold;">Zona ${zonaSelecionada} — ${totalLocais} locais em ${bairrosOrdenados.length} bairros. Escolha um bairro:</p>`;
 
   bairrosOrdenados.forEach(bairro => {
-    const locais = Object.keys(porBairro[bairro]).sort();
-    html += `<div class="bairro-grupo">`;
-    html += `<div class="bairro-titulo">📍 ${bairro} (${locais.length} ${locais.length === 1 ? 'local' : 'locais'})</div>`;
-    locais.forEach(nome => {
-      html += `<button class="local-botao" onclick="mostrarSecoes('${nome.replace(/'/g, "\\'")}', '${z}')">${nome}</button>`;
-    });
-    html += `</div>`;
+    const qtd = Object.keys(porBairro[bairro]).length;
+    html += `<button class="bairro-botao" onclick="mostrarLocaisDoBairro('${bairro.replace(/'/g, "\\'")}')">📍 ${bairro} (${qtd} ${qtd === 1 ? 'local' : 'locais'})</button>`;
   });
 
   div.innerHTML = html;
 }
 
-function mostrarSecoes(nomeLocal, zona) {
+function mostrarLocaisDoBairro(bairro) {
   const div = document.getElementById("resultadoLocal");
-  const registros = dados.filter(d => d.zonaNova === zona && d.local === nomeLocal);
+  const registros = dados.filter(d => d.zonaNova === zonaSelecionada && d.bairro === bairro);
+
+  const locais = {};
+  registros.forEach(d => {
+    if (!locais[d.local]) {
+      locais[d.local] = { endereco: d.endereco, secoes: [] };
+    }
+    locais[d.local].secoes.push(d.secaoNova);
+  });
+
+  const nomesLocais = Object.keys(locais).sort();
+
+  let html = `
+    <button class="local-botao" onclick="mostrarBairros()" style="background:#f0f0f0;">← Voltar aos bairros</button>
+    <p style="font-weight:bold;">Bairro: ${bairro} — ${nomesLocais.length} ${nomesLocais.length === 1 ? 'local' : 'locais'}:</p>
+  `;
+
+  nomesLocais.forEach(nome => {
+    html += `<button class="local-botao" onclick="mostrarSecoes('${nome.replace(/'/g, "\\'")}')">🏫 ${nome}</button>`;
+  });
+
+  div.innerHTML = html;
+}
+
+function mostrarSecoes(nomeLocal) {
+  const div = document.getElementById("resultadoLocal");
+  const registros = dados.filter(d => d.zonaNova === zonaSelecionada && d.local === nomeLocal);
 
   if (registros.length === 0) {
     div.innerHTML = '<p class="erro">Nenhuma seção encontrada.</p>';
@@ -328,11 +369,11 @@ function mostrarSecoes(nomeLocal, zona) {
     .sort((a, b) => Number(a) - Number(b));
 
   let html = `
-    <button class="local-botao" onclick="mostrarLocais()" style="background:#f0f0f0;">← Voltar aos locais</button>
+    <button class="local-botao" onclick="mostrarLocaisDoBairro('${bairro.replace(/'/g, "\\'")}')" style="background:#f0f0f0;">← Voltar aos locais</button>
     <div class="item">
       <p class="local-titulo">📍 ${nomeLocal}</p>
       <p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p>
-      <p><strong>Zona:</strong> ${zona} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p>
+      <p><strong>Zona:</strong> ${zonaSelecionada} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p>
       <p><strong>Seções (${secoesUnicas.length}):</strong></p>
       <div class="secoes-lista">
         ${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}
@@ -341,6 +382,14 @@ function mostrarSecoes(nomeLocal, zona) {
   `;
   div.innerHTML = html;
 }
+
+// Fecha a lista de zonas ao clicar fora
+document.addEventListener("click", function(e) {
+  const container = document.querySelector(".busca-container");
+  if (container && !container.contains(e.target)) {
+    document.getElementById("listaZonas").style.display = "none";
+  }
+});
 </script>
 
 </body>
