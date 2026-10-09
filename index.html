@@ -114,8 +114,8 @@ const BAIRROS = [
   "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
   "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Jacarepaguá",
   "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
-  "Recreio", "Recreio dos Bandeirantes", "Tanque", "Taquara", "Vargem Grande",
-  "Vargem Pequena", "Vila Valqueire"
+  "Recreio", "Recreio dos Bandeirantes", "Bairro de Fátima", "Fátima",
+  "Tanque", "Taquara", "Vargem Grande", "Vargem Pequena", "Vila Valqueire"
 ];
 
 const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
@@ -140,8 +140,9 @@ function extrairBairro(endereco) {
   const enderecoSimp = simplificar(endereco);
   for (const bairro of BAIRROS_ORDENADOS) {
     if (enderecoSimp.endsWith(simplificar(bairro))) {
-      // Padroniza "Recreio" para "Recreio dos Bandeirantes"
+      // Padroniza variações para o nome oficial
       if (bairro === "Recreio") return "Recreio dos Bandeirantes";
+      if (bairro === "Fátima") return "Bairro de Fátima";
       return bairro;
     }
   }
