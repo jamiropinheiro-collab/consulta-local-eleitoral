@@ -38,8 +38,8 @@
   .secao-tag { background: #eef4ff; color: #0066cc; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: bold; }
   .bairro-botao { display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; background: #dde7f7; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; }
   .bairro-botao:hover { background: #ccd9f0; }
+  .bairro-titulo { font-weight: bold; color: #333; font-size: 15px; padding: 8px 12px; background: #dde7f7; border-radius: 6px; margin-bottom: 10px; }
 
-  /* Chips de zonas */
   .chips-container {
     margin-top: 10px;
     padding: 12px;
@@ -80,6 +80,26 @@
     color: #999;
     font-style: italic;
   }
+  .chip-bairro {
+    padding: 8px 14px;
+    background: #f0e8dd;
+    color: #7a5c2e;
+    border: 2px solid transparent;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .chip-bairro:hover {
+    background: #e5d8c5;
+    border-color: #a07840;
+  }
+  .chip-bairro.selecionado {
+    background: #a07840;
+    color: #fff;
+  }
 </style>
 </head>
 <body>
@@ -105,17 +125,27 @@
 
 <hr>
 
-<div class="secao-titulo">🔎 Consulta por Local</div>
+<div class="secao-titulo">🔎 Consulta por Zona</div>
 
 <label>Zona: <span class="dica" id="contadorZonas"></span></label>
-
-<input type="text" inputmode="numeric" id="filtroZonas" placeholder="🔍 Digite para filtrar (opcional)" oninput="renderizarChips()" autocomplete="off">
 
 <div class="chips-container" id="chipsContainer">
   <div class="chip-vazio">Carregando zonas...</div>
 </div>
 
 <div id="resultadoLocal" style="margin-top: 20px;"></div>
+
+<hr>
+
+<div class="secao-titulo">🔎 Consulta por Bairro</div>
+
+<label>Bairro: <span class="dica" id="contadorBairros"></span></label>
+
+<div class="chips-container" id="chipsBairrosContainer">
+  <div class="chip-vazio">Carregando bairros...</div>
+</div>
+
+<div id="resultadoBairro" style="margin-top: 20px;"></div>
 
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
@@ -148,7 +178,7 @@ const BAIRROS = [
   "Deodoro", "Gericinó", "Guaratiba", "Ilha de Guaratiba", "Inhoaíba", "Jabour",
   "Jardim Sulacap", "Magalhães Bastos", "Paciência", "Padre Miguel",
   "Pedra de Guaratiba", "Realengo", "Santa Cruz", "Santíssimo", "Senador Camará",
-  "Senador Vasconcelos", "Sepetiba", "Vila Kennedy", "Vila Militar",
+  "Senador Vasconcelos", "Sepetiba", "Triagem", "Vila Kennedy", "Vila Militar",
   "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
   "Curicica", "Freguesia de Jacarepaguá", "Freguesia JPA", "Gardênia Azul", "Jacarepaguá",
   "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
@@ -161,6 +191,8 @@ const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
 let dados = [];
 let zonasDisponiveis = [];
 let zonaSelecionada = "";
+let bairrosDisponiveis = [];
+let bairroSelecionado = "";
 
 function normalizar(valor) {
   const s = String(valor).trim();
@@ -208,7 +240,13 @@ fetch(URL_CSV)
     zonasDisponiveis = [...new Set(dados.map(d => d.zonaNova))]
       .sort((a, b) => Number(a) - Number(b));
     document.getElementById("contadorZonas").textContent = `(${zonasDisponiveis.length} disponíveis)`;
+
+    bairrosDisponiveis = [...new Set(dados.map(d => d.bairro))]
+      .sort((a, b) => a.localeCompare(b, "pt-BR"));
+    document.getElementById("contadorBairros").textContent = `(${bairrosDisponiveis.length} disponíveis)`;
+
     renderizarChips();
+    renderizarChipsBairros();
   })
   .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
 
@@ -290,31 +328,27 @@ function limpar() {
   document.getElementById("secaoAntiga").value = "";
   document.getElementById("resultado").innerHTML = "";
 
-  document.getElementById("filtroZonas").value = "";
+  zonaSelecionada = "";
   renderizarChips();
   document.getElementById("resultadoLocal").innerHTML = "";
-  zonaSelecionada = "";
+
+  bairroSelecionado = "";
+  renderizarChipsBairros();
+  document.getElementById("resultadoBairro").innerHTML = "";
 
   document.getElementById("zonaAntiga").focus();
 }
 
-// ---------- Consulta 2: chips de zona → bairro → local → seções ----------
+// ---------- Consulta 2: por zona ----------
 function renderizarChips() {
   const container = document.getElementById("chipsContainer");
-  const termo = document.getElementById("filtroZonas").value.trim();
-  const termoNorm = termo === "" ? "" : normalizar(termo);
-
-  const filtradas = zonasDisponiveis.filter(z =>
-    termoNorm === "" || z.startsWith(termoNorm)
-  );
-
-  if (filtradas.length === 0) {
-    container.innerHTML = '<div class="chip-vazio">Nenhuma zona encontrada</div>';
+  if (zonasDisponiveis.length === 0) {
+    container.innerHTML = '<div class="chip-vazio">Carregando zonas...</div>';
     return;
   }
 
   let html = '<div class="chips-grid">';
-  filtradas.forEach(z => {
+  zonasDisponiveis.forEach(z => {
     const classe = (z === zonaSelecionada) ? "chip-zona selecionado" : "chip-zona";
     html += `<button class="${classe}" onclick="selecionarZona('${z}')">${z}</button>`;
   });
@@ -411,6 +445,100 @@ function mostrarSecoes(nomeLocal) {
       <p class="local-titulo">📍 ${nomeLocal}</p>
       <p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p>
       <p><strong>Zona:</strong> ${zonaSelecionada} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p>
+      <p><strong>Seções (${secoesUnicas.length}):</strong></p>
+      <div class="secoes-lista">
+        ${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}
+      </div>
+    </div>
+  `;
+  div.innerHTML = html;
+}
+
+// ---------- Consulta 3: por bairro ----------
+function renderizarChipsBairros() {
+  const container = document.getElementById("chipsBairrosContainer");
+  if (bairrosDisponiveis.length === 0) {
+    container.innerHTML = '<div class="chip-vazio">Carregando bairros...</div>';
+    return;
+  }
+
+  let html = '<div class="chips-grid">';
+  bairrosDisponiveis.forEach(b => {
+    const classe = (b === bairroSelecionado) ? "chip-bairro selecionado" : "chip-bairro";
+    html += `<button class="${classe}" onclick="selecionarBairro('${b.replace(/'/g, "\\'")}')">${b}</button>`;
+  });
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
+function selecionarBairro(b) {
+  bairroSelecionado = b;
+  renderizarChipsBairros();
+  mostrarLocaisDoBairroConsulta(b);
+  document.getElementById("resultadoBairro").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function mostrarLocaisDoBairroConsulta(bairro) {
+  const div = document.getElementById("resultadoBairro");
+  const registros = dados.filter(d => d.bairro === bairro);
+
+  if (registros.length === 0) {
+    div.innerHTML = '<p class="erro">Nenhum local encontrado nesse bairro.</p>';
+    return;
+  }
+
+  // Agrupa por zona → local (chave composta zona|local para separar)
+  const porZona = {};
+  registros.forEach(d => {
+    if (!porZona[d.zonaNova]) porZona[d.zonaNova] = {};
+    const chave = d.zonaNova + "|" + d.local;
+    if (!porZona[d.zonaNova][chave]) {
+      porZona[d.zonaNova][chave] = { nome: d.local, endereco: d.endereco, secoes: [] };
+    }
+    porZona[d.zonaNova][chave].secoes.push(d.secaoNova);
+  });
+
+  const zonasOrd = Object.keys(porZona).sort((a, b) => Number(a) - Number(b));
+  let totalLocais = 0;
+  zonasOrd.forEach(z => totalLocais += Object.keys(porZona[z]).length);
+
+  let html = `<p style="font-weight:bold;">Bairro ${bairro} — ${totalLocais} locais em ${zonasOrd.length} ${zonasOrd.length === 1 ? 'zona' : 'zonas'}:</p>`;
+
+  zonasOrd.forEach(z => {
+    html += `<div class="bairro-titulo" style="margin-top:14px;">Zona ${z}</div>`;
+    const chaves = Object.keys(porZona[z]).sort((a, b) =>
+      porZona[z][a].nome.localeCompare(porZona[z][b].nome, "pt-BR")
+    );
+    chaves.forEach(chave => {
+      const item = porZona[z][chave];
+      html += `<button class="local-botao" onclick="mostrarSecoesBairro('${z}', '${item.nome.replace(/'/g, "\\'")}', '${bairro.replace(/'/g, "\\'")}')">🏫 ${item.nome}</button>`;
+    });
+  });
+
+  div.innerHTML = html;
+}
+
+function mostrarSecoesBairro(zona, nomeLocal, bairro) {
+  const div = document.getElementById("resultadoBairro");
+  const registros = dados.filter(d => d.zonaNova === zona && d.local === nomeLocal);
+
+  if (registros.length === 0) {
+    div.innerHTML = '<p class="erro">Nenhuma seção encontrada.</p>';
+    return;
+  }
+
+  const endereco = registros[0].endereco;
+
+  const secoesUnicas = [...new Set(registros.map(r => r.secaoNova))]
+    .sort((a, b) => Number(a) - Number(b));
+
+  let html = `
+    <button class="local-botao" onclick="mostrarLocaisDoBairroConsulta('${bairro.replace(/'/g, "\\'")}')" style="background:#f0f0f0;">← Voltar aos locais do bairro</button>
+    <div class="item">
+      <p class="local-titulo">📍 ${nomeLocal}</p>
+      <p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p>
+      <p><strong>Zona:</strong> ${zona} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p>
       <p><strong>Seções (${secoesUnicas.length}):</strong></p>
       <div class="secoes-lista">
         ${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}
