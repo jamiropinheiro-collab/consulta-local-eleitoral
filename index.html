@@ -68,7 +68,6 @@
   .bairro-botao:hover { background: #ccd9f0; }
   .bairro-titulo { font-weight: bold; color: #333; font-size: 15px; padding: 8px 12px; background: #dde7f7; border-radius: 6px; margin-bottom: 10px; }
 
-  /* Abas de região */
   .abas-regiao {
     display: flex;
     flex-wrap: wrap;
@@ -88,14 +87,8 @@
     font-family: inherit;
     flex: none;
   }
-  .aba-regiao:hover {
-    background: #faf1e3;
-  }
-  .aba-regiao.selecionada {
-    background: #a07840;
-    color: #fff;
-    border-color: #a07840;
-  }
+  .aba-regiao:hover { background: #faf1e3; }
+  .aba-regiao.selecionada { background: #a07840; color: #fff; border-color: #a07840; }
 
   .chips-container { margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; max-height: 220px; overflow-y: auto; }
   .chips-grid { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -162,7 +155,6 @@
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
 
-// Lista de bairros (para extração do nome a partir do endereço)
 const BAIRROS = [
   "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
   "Paquetá", "Ilha de Paquetá", "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde",
@@ -205,8 +197,6 @@ const BAIRROS = [
 
 const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
 
-// Mapa de bairro → regiões
-// Um bairro pode aparecer em mais de uma região (ex: Ilha e Zona Norte)
 const REGIOES = {
   "Centro": [
     "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
@@ -259,9 +249,8 @@ const REGIOES = {
   ]
 };
 
-// Ordem das abas: Centro → Zona Sul → Zona Norte → Zona Oeste → Sudoeste → Ilha → Todas
 const ABAS_ORDEM = ["Centro", "Zona Sul", "Zona Norte", "Zona Oeste", "Sudoeste", "Ilha", "Todas"];
-let abaSelecionada = "Centro"; // padrão
+let abaSelecionada = "Centro";
 
 let dados = [];
 let zonasDisponiveis = [];
@@ -341,6 +330,7 @@ fetch(URL_CSV)
   })
   .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
 
+// ---------- Consulta 1: por zona/seção ----------
 function consultar() {
   const z = normalizar(document.getElementById("zonaAntiga").value);
   const s = normalizar(document.getElementById("secaoAntiga").value);
@@ -433,6 +423,7 @@ function limpar() {
   document.getElementById("zonaAntiga").focus();
 }
 
+// ---------- Consulta 2: por zona ----------
 function renderizarChips() {
   const container = document.getElementById("chipsContainer");
   if (zonasDisponiveis.length === 0) {
@@ -547,5 +538,10 @@ function mostrarSecoes(nomeLocal) {
   div.innerHTML = html;
 }
 
-// ---------- Consulta por Bairro (com abas por região) ----------
-function render
+// ---------- Consulta 3: por bairro (com abas por região) ----------
+function renderizarAbas() {
+  const container = document.getElementById("abasRegiao");
+  let html = '';
+  ABAS_ORDEM.forEach(nome => {
+    const classe = (nome === abaSelecionada) ? "aba-regiao selecionada" : "aba-regiao";
+    html += `<button class="${cl
