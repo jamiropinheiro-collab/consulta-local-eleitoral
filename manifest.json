@@ -2,7 +2,7 @@
   "name": "Locais de Votação - Rio de Janeiro",
   "short_name": "Locais de Votação",
   "description": "Consulta de local de votação - Eleições 2026 - Município do Rio de Janeiro",
-  "start_url": "/consulta-local-eleitoral-rj-rj/",
+  "start_url": "/consulta.local.rj.rj/",
   "display": "standalone",
   "background_color": "#f4f4f4",
   "theme_color": "#0066cc",
