@@ -6,12 +6,10 @@
 <title>Consulta de Local de Votação — Eleições 2026</title>
 <style>
   body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; padding: 15px; background: #f4f4f4; }
-
   .bloco { padding: 15px; border-radius: 12px; margin-bottom: 15px; }
   .bloco-principal { background: #eaf2fb; border: 1px solid #c5dbf3; }
   .bloco-zona { background: #eef7ee; border: 1px solid #c8e6c9; }
   .bloco-bairro { background: #fdf3e7; border: 1px solid #f5ddb8; }
-
   .cabecalho { text-align: center; margin-bottom: 20px; }
   .eleicao { display: inline-block; background: #0066cc; color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 18px; letter-spacing: 1px; margin-bottom: 15px; }
   h1 { color: #333; font-size: 20px; margin: 10px 0 5px; }
@@ -35,29 +33,12 @@
   .com-alteracao { background: #fff8e1; border-left: 4px solid #f9a825; }
   .com-alteracao .titulo-item { color: #b26a00; }
   .erro { color: #c00; font-weight: bold; padding: 15px; background: #fff; border-radius: 8px; }
-
-  .secao-titulo {
-    font-size: 16px;
-    color: #0066cc;
-    font-weight: bold;
-    text-align: center;
-    margin: 0;
-    padding: 12px;
-    background: #dbe9f8;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  .secao-titulo { font-size: 16px; color: #0066cc; font-weight: bold; text-align: center; margin: 0; padding: 12px; background: #dbe9f8; border-radius: 8px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; }
   .secao-titulo:hover { background: #c5dbf3; }
   .secao-titulo .seta { font-size: 12px; transition: transform 0.2s; }
   .secao-titulo.aberto .seta { transform: rotate(180deg); }
-
   .secao-conteudo { display: none; margin-top: 15px; }
   .secao-conteudo.aberto { display: block; }
-
   .local-botao { display: block; width: 100%; text-align: left; padding: 12px 15px; margin-bottom: 8px; background: #fff; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; cursor: pointer; color: #333; }
   .local-botao:hover { background: #eef4ff; border-color: #0066cc; }
   .local-titulo { font-weight: bold; color: #0066cc; margin-bottom: 8px; }
@@ -67,29 +48,10 @@
   .bairro-botao { display: block; width: 100%; text-align: left; padding: 14px 15px; margin-bottom: 8px; background: #dde7f7; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; color: #333; }
   .bairro-botao:hover { background: #ccd9f0; }
   .bairro-titulo { font-weight: bold; color: #333; font-size: 15px; padding: 8px 12px; background: #dde7f7; border-radius: 6px; margin-bottom: 10px; }
-
-  .abas-regiao {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 12px;
-  }
-  .aba-regiao {
-    padding: 6px 12px;
-    background: #fff;
-    color: #7a5c2e;
-    border: 1px solid #d4b98c;
-    border-radius: 16px;
-    font-size: 13px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-    flex: none;
-  }
+  .abas-regiao { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .aba-regiao { padding: 6px 12px; background: #fff; color: #7a5c2e; border: 1px solid #d4b98c; border-radius: 16px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.15s; font-family: inherit; flex: none; }
   .aba-regiao:hover { background: #faf1e3; }
   .aba-regiao.selecionada { background: #a07840; color: #fff; border-color: #a07840; }
-
   .chips-container { margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; max-height: 220px; overflow-y: auto; }
   .chips-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip-zona { padding: 8px 14px; background: #eef4ff; color: #0066cc; border: 2px solid transparent; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.15s; font-family: inherit; }
@@ -113,15 +75,12 @@
 <div class="bloco bloco-principal">
   <label>Zona:</label>
   <input type="text" inputmode="numeric" id="zonaAntiga" placeholder="Ex: 100">
-
   <label>Seção: <span class="dica">(opcional)</span></label>
   <input type="text" inputmode="numeric" id="secaoAntiga" placeholder="Ex: 45">
-
   <div class="botoes">
     <button id="btnConsultar" onclick="consultar()">Consultar</button>
     <button id="btnLimpar" onclick="limpar()">Limpar</button>
   </div>
-
   <div id="resultado"></div>
 </div>
 
@@ -151,7 +110,6 @@
     <div id="resultadoBairro" style="margin-top: 20px;"></div>
   </div>
 </div>
-
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
 
@@ -198,55 +156,12 @@ const BAIRROS = [
 const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
 
 const REGIOES = {
-  "Centro": [
-    "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
-    "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde"
-  ],
-  "Zona Sul": [
-    "Botafogo", "Catete", "Copacabana", "Cosme Velho", "Flamengo", "Gávea",
-    "Humaitá", "Ipanema", "Jardim Botânico", "Lagoa", "Laranjeiras", "Leblon",
-    "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal"
-  ],
-  "Zona Norte": [
-    "Abolição", "Acari", "Água Santa", "Alto da Boa Vista", "Anchieta", "Andaraí",
-    "Bancários", "Barros Filho", "Benfica", "Bento Ribeiro", "Bonsucesso",
-    "Brás de Pina", "Cachambi", "Campinho", "Cascadura", "Cavalcanti",
-    "Cidade Universitária", "Coelho Neto", "Colégio", "Complexo do Alemão",
-    "Cordovil", "Costa Barros", "Del Castilho", "Encantado", "Engenheiro Leal",
-    "Engenho da Rainha", "Engenho de Dentro", "Engenho Novo", "Freguesia",
-    "Grajaú", "Guadalupe", "Higienópolis", "Honório Gurgel", "Inhaúma",
-    "Irajá", "Jacaré", "Jacarezinho", "Jardim América", "Jardim Carioca",
-    "Lins de Vasconcelos", "Madureira", "Mangueira", "Manguinhos", "Maracanã",
-    "Maré", "Marechal Hermes", "Maria da Graça", "Méier", "Olaria",
-    "Oswaldo Cruz", "Parada de Lucas", "Parque Anchieta", "Parque Colúmbia",
-    "Pavuna", "Penha", "Penha Circular", "Piedade", "Pilares", "Pitangueiras",
-    "Portuguesa", "Praça da Bandeira", "Praia da Bandeira", "Quintino Bocaiúva",
-    "Ramos", "Riachuelo", "Ribeira", "Ricardo de Albuquerque", "Rocha",
-    "Rocha Miranda", "Sampaio", "São Cristóvão", "São Francisco Xavier", "Tauá",
-    "Tijuca", "Todos os Santos", "Tomás Coelho", "Turiaçu", "Vasco da Gama",
-    "Vaz Lobo", "Vicente de Carvalho", "Vigário Geral", "Vila da Penha",
-    "Vila Isabel", "Vila Kosmos", "Vista Alegre"
-  ],
-  "Zona Oeste": [
-    "Augusto Vasconcelos", "Bangu", "Barra de Guaratiba", "Campo dos Afonsos",
-    "Campo Grande", "Catiri", "Cosmos", "Deodoro", "Gericinó", "Guaratiba",
-    "Ilha de Guaratiba", "Inhoaíba", "Jabour", "Jardim Sulacap",
-    "Magalhães Bastos", "Paciência", "Padre Miguel", "Pedra de Guaratiba",
-    "Realengo", "Rio das Pedras", "Santa Cruz", "Santíssimo", "Senador Camará",
-    "Senador Vasconcelos", "Sepetiba", "Triagem", "Vila Kennedy", "Vila Militar"
-  ],
-  "Sudoeste": [
-    "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
-    "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Grumari",
-    "Itanhangá", "Jacarepaguá", "Joá", "Pechincha", "Praça Seca",
-    "Recreio dos Bandeirantes", "Tanque", "Taquara", "Vargem Grande",
-    "Vargem Pequena", "Vila Valqueire"
-  ],
-  "Ilha": [
-    "Bancários", "Cacuia", "Cocotá", "Freguesia da Ilha do Governador",
-    "Fundão", "Galeão", "Jardim Guanabara", "Moneró", "Paquetá",
-    "Pitangueiras", "Portuguesa", "Praia da Bandeira", "Tauá", "Tubiacanga", "Zumbi"
-  ]
+  "Centro": ["Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória", "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde"],
+  "Zona Sul": ["Botafogo", "Catete", "Copacabana", "Cosme Velho", "Flamengo", "Gávea", "Humaitá", "Ipanema", "Jardim Botânico", "Lagoa", "Laranjeiras", "Leblon", "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal"],
+  "Zona Norte": ["Abolição", "Acari", "Água Santa", "Alto da Boa Vista", "Anchieta", "Andaraí", "Bancários", "Barros Filho", "Benfica", "Bento Ribeiro", "Bonsucesso", "Brás de Pina", "Cachambi", "Campinho", "Cascadura", "Cavalcanti", "Cidade Universitária", "Coelho Neto", "Colégio", "Complexo do Alemão", "Cordovil", "Costa Barros", "Del Castilho", "Encantado", "Engenheiro Leal", "Engenho da Rainha", "Engenho de Dentro", "Engenho Novo", "Freguesia", "Grajaú", "Guadalupe", "Higienópolis", "Honório Gurgel", "Inhaúma", "Irajá", "Jacaré", "Jacarezinho", "Jardim América", "Jardim Carioca", "Lins de Vasconcelos", "Madureira", "Mangueira", "Manguinhos", "Maracanã", "Maré", "Marechal Hermes", "Maria da Graça", "Méier", "Olaria", "Oswaldo Cruz", "Parada de Lucas", "Parque Anchieta", "Parque Colúmbia", "Pavuna", "Penha", "Penha Circular", "Piedade", "Pilares", "Pitangueiras", "Portuguesa", "Praça da Bandeira", "Praia da Bandeira", "Quintino Bocaiúva", "Ramos", "Riachuelo", "Ribeira", "Ricardo de Albuquerque", "Rocha", "Rocha Miranda", "Sampaio", "São Cristóvão", "São Francisco Xavier", "Tauá", "Tijuca", "Todos os Santos", "Tomás Coelho", "Turiaçu", "Vasco da Gama", "Vaz Lobo", "Vicente de Carvalho", "Vigário Geral", "Vila da Penha", "Vila Isabel", "Vila Kosmos", "Vista Alegre"],
+  "Zona Oeste": ["Augusto Vasconcelos", "Bangu", "Barra de Guaratiba", "Campo dos Afonsos", "Campo Grande", "Catiri", "Cosmos", "Deodoro", "Gericinó", "Guaratiba", "Ilha de Guaratiba", "Inhoaíba", "Jabour", "Jardim Sulacap", "Magalhães Bastos", "Paciência", "Padre Miguel", "Pedra de Guaratiba", "Realengo", "Rio das Pedras", "Santa Cruz", "Santíssimo", "Senador Camará", "Senador Vasconcelos", "Sepetiba", "Triagem", "Vila Kennedy", "Vila Militar"],
+  "Sudoeste": ["Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus", "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Grumari", "Itanhangá", "Jacarepaguá", "Joá", "Pechincha", "Praça Seca", "Recreio dos Bandeirantes", "Tanque", "Taquara", "Vargem Grande", "Vargem Pequena", "Vila Valqueire"],
+  "Ilha": ["Bancários", "Cacuia", "Cocotá", "Freguesia da Ilha do Governador", "Fundão", "Galeão", "Jardim Guanabara", "Moneró", "Paquetá", "Pitangueiras", "Portuguesa", "Praia da Bandeira", "Tauá", "Tubiacanga", "Zumbi"]
 };
 
 const ABAS_ORDEM = ["Centro", "Zona Sul", "Zona Norte", "Zona Oeste", "Sudoeste", "Ilha", "Todas"];
@@ -318,85 +233,39 @@ fetch(URL_CSV)
         bairro: extrairBairro(endereco)
       });
     }
-    zonasDisponiveis = [...new Set(dados.map(d => d.zonaNova))]
-      .sort((a, b) => Number(a) - Number(b));
-
-    bairrosDisponiveis = [...new Set(dados.map(d => d.bairro))]
-      .sort((a, b) => a.localeCompare(b, "pt-BR"));
-
+    zonasDisponiveis = [...new Set(dados.map(d => d.zonaNova))].sort((a, b) => Number(a) - Number(b));
+    bairrosDisponiveis = [...new Set(dados.map(d => d.bairro))].sort((a, b) => a.localeCompare(b, "pt-BR"));
     renderizarChips();
     renderizarAbas();
     renderizarChipsBairros();
   })
   .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
 
-// ---------- Consulta 1: por zona/seção ----------
 function consultar() {
   const z = normalizar(document.getElementById("zonaAntiga").value);
   const s = normalizar(document.getElementById("secaoAntiga").value);
   const div = document.getElementById("resultado");
-
-  if (!z) {
-    div.innerHTML = '<p class="erro">Preencha pelo menos a Zona.</p>';
-    return;
-  }
-
+  if (!z) { div.innerHTML = '<p class="erro">Preencha pelo menos a Zona.</p>'; return; }
   let achados;
-  if (s) {
-    achados = dados.filter(d => d.zonaAntiga === z && d.secaoAntiga === s);
-  } else {
-    achados = dados.filter(d => d.zonaAntiga === z);
-  }
-
-  if (achados.length === 0) {
-    div.innerHTML = '<p class="erro">Nenhuma correspondência encontrada. Confira os números digitados.</p>';
-    return;
-  }
-
+  if (s) { achados = dados.filter(d => d.zonaAntiga === z && d.secaoAntiga === s); }
+  else { achados = dados.filter(d => d.zonaAntiga === z); }
+  if (achados.length === 0) { div.innerHTML = '<p class="erro">Nenhuma correspondência encontrada. Confira os números digitados.</p>'; return; }
   if (s) {
     const a = achados[0];
     const semAlteracao = (a.zonaAntiga === a.zonaNova && a.secaoAntiga === a.secaoNova);
     if (semAlteracao) {
-      div.innerHTML = `
-        <div class="item sem-alteracao">
-          <p class="titulo-item">✅ A numeração de sua zona e seção não sofreu alteração.</p>
-          <p><strong>Zona:</strong> ${a.zonaAntiga}</p>
-          <p><strong>Seção:</strong> ${a.secaoAntiga}</p>
-          <p><strong>Local:</strong> ${a.local}</p>
-          <p><strong>Endereço:</strong> ${a.endereco}</p>
-        </div>
-      `;
+      div.innerHTML = `<div class="item sem-alteracao"><p class="titulo-item">✅ A numeração de sua zona e seção não sofreu alteração.</p><p><strong>Zona:</strong> ${a.zonaAntiga}</p><p><strong>Seção:</strong> ${a.secaoAntiga}</p><p><strong>Local:</strong> ${a.local}</p><p><strong>Endereço:</strong> ${a.endereco}</p></div>`;
     } else {
-      div.innerHTML = `
-        <div class="item com-alteracao">
-          <p class="titulo-item">⚠️ Atenção! A numeração de sua zona e seção sofreu alteração.</p>
-          <p><strong>Zona Nova:</strong> ${a.zonaNova}</p>
-          <p><strong>Seção Nova:</strong> ${a.secaoNova}</p>
-          <p><strong>Local:</strong> ${a.local}</p>
-          <p><strong>Endereço:</strong> ${a.endereco}</p>
-        </div>
-      `;
+      div.innerHTML = `<div class="item com-alteracao"><p class="titulo-item">⚠️ Atenção! A numeração de sua zona e seção sofreu alteração.</p><p><strong>Zona Nova:</strong> ${a.zonaNova}</p><p><strong>Seção Nova:</strong> ${a.secaoNova}</p><p><strong>Local:</strong> ${a.local}</p><p><strong>Endereço:</strong> ${a.endereco}</p></div>`;
     }
   } else {
     let html = `<p style="font-weight:bold;">Encontradas ${achados.length} seções na zona ${z}:</p>`;
     achados.forEach(a => {
       const semAlteracao = (a.zonaAntiga === a.zonaNova && a.secaoAntiga === a.secaoNova);
       if (semAlteracao) {
-        html += `
-          <div class="item sem-alteracao">
-            <p class="titulo-item">✅ Seção ${a.secaoAntiga} — não sofreu alteração</p>
-            <p><strong>Local:</strong> ${a.local}</p>
-            <p><strong>Endereço:</strong> ${a.endereco}</p>
-          </div>
-        `;
+        html += `<div class="item sem-alteracao"><p class="titulo-item">✅ Seção ${a.secaoAntiga} — não sofreu alteração</p><p><strong>Local:</strong> ${a.local}</p><p><strong>Endereço:</strong> ${a.endereco}</p></div>`;
       } else {
-        html += `
-          <div class="item com-alteracao">
-            <p class="titulo-item">⚠️ Seção Antiga ${a.secaoAntiga} → Seção Nova ${a.secaoNova} (Zona ${a.zonaNova})</p>
-            <p><strong>Local:</strong> ${a.local}</p>
-            <p><strong>Endereço:</strong> ${a.endereco}</p>
-          </div>
-        `;
+        html += `<div class="item com-alteracao"><p class="titulo-item">⚠️ Seção Antiga ${a.secaoAntiga} → Seção Nova ${a.secaoNova} (Zona ${a.zonaNova})</p><p><strong>Local:</strong> ${a.local}</p><p><strong>Endereço:</strong> ${a.endereco}</p></div>`;
       }
     });
     div.innerHTML = html;
@@ -407,37 +276,27 @@ function limpar() {
   document.getElementById("zonaAntiga").value = "";
   document.getElementById("secaoAntiga").value = "";
   document.getElementById("resultado").innerHTML = "";
-
   zonaSelecionada = "";
   renderizarChips();
   document.getElementById("resultadoLocal").innerHTML = "";
-
   bairroSelecionado = "";
   abaSelecionada = "Centro";
   renderizarAbas();
   renderizarChipsBairros();
   document.getElementById("resultadoBairro").innerHTML = "";
-
   fecharSecoes();
-
   document.getElementById("zonaAntiga").focus();
 }
 
-// ---------- Consulta 2: por zona ----------
 function renderizarChips() {
   const container = document.getElementById("chipsContainer");
-  if (zonasDisponiveis.length === 0) {
-    container.innerHTML = '<div class="chip-vazio">Carregando zonas...</div>';
-    return;
-  }
-
+  if (zonasDisponiveis.length === 0) { container.innerHTML = '<div class="chip-vazio">Carregando zonas...</div>'; return; }
   let html = '<div class="chips-grid">';
   zonasDisponiveis.forEach(z => {
     const classe = (z === zonaSelecionada) ? "chip-zona selecionado" : "chip-zona";
     html += `<button class="${classe}" onclick="selecionarZona('${z}')">${z}</button>`;
   });
   html += '</div>';
-
   container.innerHTML = html;
 }
 
@@ -451,97 +310,71 @@ function selecionarZona(z) {
 function mostrarBairros() {
   const div = document.getElementById("resultadoLocal");
   if (!zonaSelecionada) { div.innerHTML = ""; return; }
-
   const registrosZona = dados.filter(d => d.zonaNova === zonaSelecionada);
-  if (registrosZona.length === 0) {
-    div.innerHTML = '<p class="erro">Nenhum local encontrado para essa zona.</p>';
-    return;
-  }
-
+  if (registrosZona.length === 0) { div.innerHTML = '<p class="erro">Nenhum local encontrado para essa zona.</p>'; return; }
   const porBairro = {};
   registrosZona.forEach(d => {
     const b = d.bairro;
     if (!porBairro[b]) porBairro[b] = {};
-    if (!porBairro[b][d.local]) {
-      porBairro[b][d.local] = { endereco: d.endereco, secoes: [] };
-    }
+    if (!porBairro[b][d.local]) { porBairro[b][d.local] = { endereco: d.endereco, secoes: [] }; }
     porBairro[b][d.local].secoes.push(d.secaoNova);
   });
-
   const bairrosOrdenados = Object.keys(porBairro).sort();
   let totalLocais = 0;
   bairrosOrdenados.forEach(b => totalLocais += Object.keys(porBairro[b]).length);
-
   let html = `<p style="font-weight:bold;">Zona ${zonaSelecionada} — ${totalLocais} locais em ${bairrosOrdenados.length} bairros. Escolha um bairro:</p>`;
-
   bairrosOrdenados.forEach(bairro => {
     const qtd = Object.keys(porBairro[bairro]).length;
     html += `<button class="bairro-botao" onclick="mostrarLocaisDoBairro('${bairro.replace(/'/g, "\\'")}')">📍 ${bairro} (${qtd} ${qtd === 1 ? 'local' : 'locais'})</button>`;
   });
-
   div.innerHTML = html;
 }
 
 function mostrarLocaisDoBairro(bairro) {
   const div = document.getElementById("resultadoLocal");
   const registros = dados.filter(d => d.zonaNova === zonaSelecionada && d.bairro === bairro);
-
   const locais = {};
   registros.forEach(d => {
-    if (!locais[d.local]) {
-      locais[d.local] = { endereco: d.endereco, secoes: [] };
-    }
+    if (!locais[d.local]) { locais[d.local] = { endereco: d.endereco, secoes: [] }; }
     locais[d.local].secoes.push(d.secaoNova);
   });
-
   const nomesLocais = Object.keys(locais).sort();
-
-  let html = `
-    <button class="local-botao" onclick="mostrarBairros()" style="background:#f0f0f0;">← Voltar aos bairros</button>
-    <p style="font-weight:bold;">Bairro: ${bairro} — ${nomesLocais.length} ${nomesLocais.length === 1 ? 'local' : 'locais'}:</p>
-  `;
-
+  let html = `<button class="local-botao" onclick="mostrarBairros()" style="background:#f0f0f0;">← Voltar aos bairros</button><p style="font-weight:bold;">Bairro: ${bairro} — ${nomesLocais.length} ${nomesLocais.length === 1 ? 'local' : 'locais'}:</p>`;
   nomesLocais.forEach(nome => {
     html += `<button class="local-botao" onclick="mostrarSecoes('${nome.replace(/'/g, "\\'")}')">🏫 ${nome}</button>`;
   });
-
   div.innerHTML = html;
 }
 
 function mostrarSecoes(nomeLocal) {
   const div = document.getElementById("resultadoLocal");
   const registros = dados.filter(d => d.zonaNova === zonaSelecionada && d.local === nomeLocal);
-
-  if (registros.length === 0) {
-    div.innerHTML = '<p class="erro">Nenhuma seção encontrada.</p>';
-    return;
-  }
-
+  if (registros.length === 0) { div.innerHTML = '<p class="erro">Nenhuma seção encontrada.</p>'; return; }
   const endereco = registros[0].endereco;
   const bairro = registros[0].bairro;
-
-  const secoesUnicas = [...new Set(registros.map(r => r.secaoNova))]
-    .sort((a, b) => Number(a) - Number(b));
-
-  let html = `
-    <button class="local-botao" onclick="mostrarLocaisDoBairro('${bairro.replace(/'/g, "\\'")}')" style="background:#f0f0f0;">← Voltar aos locais</button>
-    <div class="item">
-      <p class="local-titulo">📍 ${nomeLocal}</p>
-      <p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p>
-      <p><strong>Zona:</strong> ${zonaSelecionada} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p>
-      <p><strong>Seções (${secoesUnicas.length}):</strong></p>
-      <div class="secoes-lista">
-        ${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}
-      </div>
-    </div>
-  `;
+  const secoesUnicas = [...new Set(registros.map(r => r.secaoNova))].sort((a, b) => Number(a) - Number(b));
+  let html = `<button class="local-botao" onclick="mostrarLocaisDoBairro('${bairro.replace(/'/g, "\\'")}')" style="background:#f0f0f0;">← Voltar aos locais</button><div class="item"><p class="local-titulo">📍 ${nomeLocal}</p><p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p><p><strong>Zona:</strong> ${zonaSelecionada} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p><p><strong>Seções (${secoesUnicas.length}):</strong></p><div class="secoes-lista">${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}</div></div>`;
   div.innerHTML = html;
 }
 
-// ---------- Consulta 3: por bairro (com abas por região) ----------
 function renderizarAbas() {
   const container = document.getElementById("abasRegiao");
   let html = '';
   ABAS_ORDEM.forEach(nome => {
     const classe = (nome === abaSelecionada) ? "aba-regiao selecionada" : "aba-regiao";
-    html += `<button class="${cl
+    html += `<button class="${classe}" onclick="selecionarAba('${nome}')">${nome}</button>`;
+  });
+  container.innerHTML = html;
+}
+
+function selecionarAba(nome) {
+  abaSelecionada = nome;
+  bairroSelecionado = "";
+  renderizarAbas();
+  renderizarChipsBairros();
+  document.getElementById("resultadoBairro").innerHTML = "";
+}
+
+function renderizarChipsBairros() {
+  const container = document.getElementById("chipsBairrosContainer");
+  if (bairrosDisponiveis.length === 0) { container.innerHTML = '<div class="chip-vazio">Carregando bairros...</div>';
