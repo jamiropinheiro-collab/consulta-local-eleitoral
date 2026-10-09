@@ -68,13 +68,42 @@
   .bairro-botao:hover { background: #ccd9f0; }
   .bairro-titulo { font-weight: bold; color: #333; font-size: 15px; padding: 8px 12px; background: #dde7f7; border-radius: 6px; margin-bottom: 10px; }
 
-  .chips-container { margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; max-height: 200px; overflow-y: auto; }
+  /* Abas de região */
+  .abas-regiao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .aba-regiao {
+    padding: 6px 12px;
+    background: #fff;
+    color: #7a5c2e;
+    border: 1px solid #d4b98c;
+    border-radius: 16px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    flex: none;
+  }
+  .aba-regiao:hover {
+    background: #faf1e3;
+  }
+  .aba-regiao.selecionada {
+    background: #a07840;
+    color: #fff;
+    border-color: #a07840;
+  }
+
+  .chips-container { margin-top: 10px; padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 8px; max-height: 220px; overflow-y: auto; }
   .chips-grid { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip-zona { padding: 8px 14px; background: #eef4ff; color: #0066cc; border: 2px solid transparent; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.15s; font-family: inherit; }
   .chip-zona:hover { background: #d9e7ff; border-color: #0066cc; }
   .chip-zona.selecionado { background: #0066cc; color: #fff; }
   .chip-vazio { padding: 15px; text-align: center; color: #999; font-style: italic; }
-  .chip-bairro { padding: 8px 14px; background: #f0e8dd; color: #7a5c2e; border: 2px solid transparent; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .chip-bairro { padding: 7px 12px; background: #f0e8dd; color: #7a5c2e; border: 2px solid transparent; border-radius: 18px; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.15s; font-family: inherit; }
   .chip-bairro:hover { background: #e5d8c5; border-color: #a07840; }
   .chip-bairro.selecionado { background: #a07840; color: #fff; }
 </style>
@@ -122,6 +151,7 @@
     <span class="seta">▼</span>
   </div>
   <div class="secao-conteudo" id="conteudoBairro">
+    <div class="abas-regiao" id="abasRegiao"></div>
     <div class="chips-container" id="chipsBairrosContainer">
       <div class="chip-vazio">Carregando bairros...</div>
     </div>
@@ -132,6 +162,7 @@
 <script>
 const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4WU5_jxUdTYmCSGzWSfGGO8aXGKpGit7aXYC-OJw2C8-YIgPqs5wFvGh0l3qethGrQ/pub?gid=0&single=true&output=csv";
 
+// Lista de bairros (para extração do nome a partir do endereço)
 const BAIRROS = [
   "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
   "Paquetá", "Ilha de Paquetá", "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde",
@@ -174,6 +205,64 @@ const BAIRROS = [
 
 const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
 
+// Mapa de bairro → regiões
+// Um bairro pode aparecer em mais de uma região (ex: Ilha e Zona Norte)
+const REGIOES = {
+  "Centro": [
+    "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
+    "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde"
+  ],
+  "Zona Sul": [
+    "Botafogo", "Catete", "Copacabana", "Cosme Velho", "Flamengo", "Gávea",
+    "Humaitá", "Ipanema", "Jardim Botânico", "Lagoa", "Laranjeiras", "Leblon",
+    "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal"
+  ],
+  "Zona Norte": [
+    "Abolição", "Acari", "Água Santa", "Alto da Boa Vista", "Anchieta", "Andaraí",
+    "Bancários", "Barros Filho", "Benfica", "Bento Ribeiro", "Bonsucesso",
+    "Brás de Pina", "Cachambi", "Campinho", "Cascadura", "Cavalcanti",
+    "Cidade Universitária", "Coelho Neto", "Colégio", "Complexo do Alemão",
+    "Cordovil", "Costa Barros", "Del Castilho", "Encantado", "Engenheiro Leal",
+    "Engenho da Rainha", "Engenho de Dentro", "Engenho Novo", "Freguesia",
+    "Grajaú", "Guadalupe", "Higienópolis", "Honório Gurgel", "Inhaúma",
+    "Irajá", "Jacaré", "Jacarezinho", "Jardim América", "Jardim Carioca",
+    "Lins de Vasconcelos", "Madureira", "Mangueira", "Manguinhos", "Maracanã",
+    "Maré", "Marechal Hermes", "Maria da Graça", "Méier", "Olaria",
+    "Oswaldo Cruz", "Parada de Lucas", "Parque Anchieta", "Parque Colúmbia",
+    "Pavuna", "Penha", "Penha Circular", "Piedade", "Pilares", "Pitangueiras",
+    "Portuguesa", "Praça da Bandeira", "Praia da Bandeira", "Quintino Bocaiúva",
+    "Ramos", "Riachuelo", "Ribeira", "Ricardo de Albuquerque", "Rocha",
+    "Rocha Miranda", "Sampaio", "São Cristóvão", "São Francisco Xavier", "Tauá",
+    "Tijuca", "Todos os Santos", "Tomás Coelho", "Turiaçu", "Vasco da Gama",
+    "Vaz Lobo", "Vicente de Carvalho", "Vigário Geral", "Vila da Penha",
+    "Vila Isabel", "Vila Kosmos", "Vista Alegre"
+  ],
+  "Zona Oeste": [
+    "Augusto Vasconcelos", "Bangu", "Barra de Guaratiba", "Campo dos Afonsos",
+    "Campo Grande", "Catiri", "Cosmos", "Deodoro", "Gericinó", "Guaratiba",
+    "Ilha de Guaratiba", "Inhoaíba", "Jabour", "Jardim Sulacap",
+    "Magalhães Bastos", "Paciência", "Padre Miguel", "Pedra de Guaratiba",
+    "Realengo", "Rio das Pedras", "Santa Cruz", "Santíssimo", "Senador Camará",
+    "Senador Vasconcelos", "Sepetiba", "Triagem", "Vila Kennedy", "Vila Militar"
+  ],
+  "Sudoeste": [
+    "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
+    "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Grumari",
+    "Itanhangá", "Jacarepaguá", "Joá", "Pechincha", "Praça Seca",
+    "Recreio dos Bandeirantes", "Tanque", "Taquara", "Vargem Grande",
+    "Vargem Pequena", "Vila Valqueire"
+  ],
+  "Ilha": [
+    "Bancários", "Cacuia", "Cocotá", "Freguesia da Ilha do Governador",
+    "Fundão", "Galeão", "Jardim Guanabara", "Moneró", "Paquetá",
+    "Pitangueiras", "Portuguesa", "Praia da Bandeira", "Tauá", "Tubiacanga", "Zumbi"
+  ]
+};
+
+// Ordem das abas: Centro → Zona Sul → Zona Norte → Zona Oeste → Sudoeste → Ilha → Todas
+const ABAS_ORDEM = ["Centro", "Zona Sul", "Zona Norte", "Zona Oeste", "Sudoeste", "Ilha", "Todas"];
+let abaSelecionada = "Centro"; // padrão
+
 let dados = [];
 let zonasDisponiveis = [];
 let zonaSelecionada = "";
@@ -196,7 +285,6 @@ function extrairBairro(endereco) {
   const enderecoSimp = simplificar(endereco);
   for (const bairro of BAIRROS_ORDENADOS) {
     if (enderecoSimp.endsWith(simplificar(bairro))) {
-      // Padroniza variações para o nome oficial
       if (bairro === "Recreio") return "Recreio dos Bandeirantes";
       if (bairro === "Fátima") return "Bairro de Fátima";
       if (bairro === "Freguesia JPA") return "Freguesia de Jacarepaguá";
@@ -214,6 +302,13 @@ function toggleSecao(qual) {
   const titulo = document.getElementById(qual === "zona" ? "tituloZona" : "tituloBairro");
   conteudo.classList.toggle("aberto");
   titulo.classList.toggle("aberto");
+}
+
+function fecharSecoes() {
+  document.getElementById("conteudoZona").classList.remove("aberto");
+  document.getElementById("tituloZona").classList.remove("aberto");
+  document.getElementById("conteudoBairro").classList.remove("aberto");
+  document.getElementById("tituloBairro").classList.remove("aberto");
 }
 
 fetch(URL_CSV)
@@ -241,6 +336,7 @@ fetch(URL_CSV)
       .sort((a, b) => a.localeCompare(b, "pt-BR"));
 
     renderizarChips();
+    renderizarAbas();
     renderizarChipsBairros();
   })
   .catch(() => alert("Erro ao carregar dados. Verifique a conexão."));
@@ -327,8 +423,12 @@ function limpar() {
   document.getElementById("resultadoLocal").innerHTML = "";
 
   bairroSelecionado = "";
+  abaSelecionada = "Centro";
+  renderizarAbas();
   renderizarChipsBairros();
   document.getElementById("resultadoBairro").innerHTML = "";
+
+  fecharSecoes();
 
   document.getElementById("zonaAntiga").focus();
 }
@@ -447,98 +547,5 @@ function mostrarSecoes(nomeLocal) {
   div.innerHTML = html;
 }
 
-function renderizarChipsBairros() {
-  const container = document.getElementById("chipsBairrosContainer");
-  if (bairrosDisponiveis.length === 0) {
-    container.innerHTML = '<div class="chip-vazio">Carregando bairros...</div>';
-    return;
-  }
-
-  let html = '<div class="chips-grid">';
-  bairrosDisponiveis.forEach(b => {
-    const classe = (b === bairroSelecionado) ? "chip-bairro selecionado" : "chip-bairro";
-    html += `<button class="${classe}" onclick="selecionarBairro('${b.replace(/'/g, "\\'")}')">${b}</button>`;
-  });
-  html += '</div>';
-
-  container.innerHTML = html;
-}
-
-function selecionarBairro(b) {
-  bairroSelecionado = b;
-  renderizarChipsBairros();
-  mostrarLocaisDoBairroConsulta(b);
-  document.getElementById("resultadoBairro").scrollIntoView({ behavior: "smooth", block: "nearest" });
-}
-
-function mostrarLocaisDoBairroConsulta(bairro) {
-  const div = document.getElementById("resultadoBairro");
-  const registros = dados.filter(d => d.bairro === bairro);
-
-  if (registros.length === 0) {
-    div.innerHTML = '<p class="erro">Nenhum local encontrado nesse bairro.</p>';
-    return;
-  }
-
-  const porZona = {};
-  registros.forEach(d => {
-    if (!porZona[d.zonaNova]) porZona[d.zonaNova] = {};
-    const chave = d.zonaNova + "|" + d.local;
-    if (!porZona[d.zonaNova][chave]) {
-      porZona[d.zonaNova][chave] = { nome: d.local, endereco: d.endereco, secoes: [] };
-    }
-    porZona[d.zonaNova][chave].secoes.push(d.secaoNova);
-  });
-
-  const zonasOrd = Object.keys(porZona).sort((a, b) => Number(a) - Number(b));
-  let totalLocais = 0;
-  zonasOrd.forEach(z => totalLocais += Object.keys(porZona[z]).length);
-
-  let html = `<p style="font-weight:bold;">Bairro ${bairro} — ${totalLocais} locais em ${zonasOrd.length} ${zonasOrd.length === 1 ? 'zona' : 'zonas'}:</p>`;
-
-  zonasOrd.forEach(z => {
-    html += `<div class="bairro-titulo" style="margin-top:14px;">Zona ${z}</div>`;
-    const chaves = Object.keys(porZona[z]).sort((a, b) =>
-      porZona[z][a].nome.localeCompare(porZona[z][b].nome, "pt-BR")
-    );
-    chaves.forEach(chave => {
-      const item = porZona[z][chave];
-      html += `<button class="local-botao" onclick="mostrarSecoesBairro('${z}', '${item.nome.replace(/'/g, "\\'")}', '${bairro.replace(/'/g, "\\'")}')">🏫 ${item.nome}</button>`;
-    });
-  });
-
-  div.innerHTML = html;
-}
-
-function mostrarSecoesBairro(zona, nomeLocal, bairro) {
-  const div = document.getElementById("resultadoBairro");
-  const registros = dados.filter(d => d.zonaNova === zona && d.local === nomeLocal);
-
-  if (registros.length === 0) {
-    div.innerHTML = '<p class="erro">Nenhuma seção encontrada.</p>';
-    return;
-  }
-
-  const endereco = registros[0].endereco;
-
-  const secoesUnicas = [...new Set(registros.map(r => r.secaoNova))]
-    .sort((a, b) => Number(a) - Number(b));
-
-  let html = `
-    <button class="local-botao" onclick="mostrarLocaisDoBairroConsulta('${bairro.replace(/'/g, "\\'")}')" style="background:#f0f0f0;">← Voltar aos locais do bairro</button>
-    <div class="item">
-      <p class="local-titulo">📍 ${nomeLocal}</p>
-      <p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p>
-      <p><strong>Zona:</strong> ${zona} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p>
-      <p><strong>Seções (${secoesUnicas.length}):</strong></p>
-      <div class="secoes-lista">
-        ${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}
-      </div>
-    </div>
-  `;
-  div.innerHTML = html;
-}
-</script>
-
-</body>
-</html>
+// ---------- Consulta por Bairro (com abas por região) ----------
+function render
