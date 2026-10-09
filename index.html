@@ -377,4 +377,70 @@ function selecionarAba(nome) {
 
 function renderizarChipsBairros() {
   const container = document.getElementById("chipsBairrosContainer");
-  if (bairrosDisponiveis.length === 0) { container.innerHTML = '<div class="chip-vazio">Carregando bairros...</div>';
+  if (bairrosDisponiveis.length === 0) { container.innerHTML = '<div class="chip-vazio">Carregando bairros...</div>'; return; }
+
+  let filtrados;
+  if (abaSelecionada === "Todas") {
+    filtrados = bairrosDisponiveis;
+  } else {
+    const daRegiao = REGIOES[abaSelecionada] || [];
+    filtrados = bairrosDisponiveis.filter(b => daRegiao.includes(b));
+  }
+
+  if (filtrados.length === 0) { container.innerHTML = '<div class="chip-vazio">Nenhum bairro nesta região.</div>'; return; }
+
+  let html = '<div class="chips-grid">';
+  filtrados.forEach(b => {
+    const classe = (b === bairroSelecionado) ? "chip-bairro selecionado" : "chip-bairro";
+    html += `<button class="${classe}" onclick="selecionarBairro('${b.replace(/'/g, "\\'")}')">${b}</button>`;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function selecionarBairro(b) {
+  bairroSelecionado = b;
+  renderizarChipsBairros();
+  mostrarLocaisDoBairroConsulta(b);
+  document.getElementById("resultadoBairro").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function mostrarLocaisDoBairroConsulta(bairro) {
+  const div = document.getElementById("resultadoBairro");
+  const registros = dados.filter(d => d.bairro === bairro);
+  if (registros.length === 0) { div.innerHTML = '<p class="erro">Nenhum local encontrado nesse bairro.</p>'; return; }
+  const porZona = {};
+  registros.forEach(d => {
+    if (!porZona[d.zonaNova]) porZona[d.zonaNova] = {};
+    const chave = d.zonaNova + "|" + d.local;
+    if (!porZona[d.zonaNova][chave]) { porZona[d.zonaNova][chave] = { nome: d.local, endereco: d.endereco, secoes: [] }; }
+    porZona[d.zonaNova][chave].secoes.push(d.secaoNova);
+  });
+  const zonasOrd = Object.keys(porZona).sort((a, b) => Number(a) - Number(b));
+  let totalLocais = 0;
+  zonasOrd.forEach(z => totalLocais += Object.keys(porZona[z]).length);
+  let html = `<p style="font-weight:bold;">Bairro ${bairro} — ${totalLocais} locais em ${zonasOrd.length} ${zonasOrd.length === 1 ? 'zona' : 'zonas'}:</p>`;
+  zonasOrd.forEach(z => {
+    html += `<div class="bairro-titulo" style="margin-top:14px;">Zona ${z}</div>`;
+    const chaves = Object.keys(porZona[z]).sort((a, b) => porZona[z][a].nome.localeCompare(porZona[z][b].nome, "pt-BR"));
+    chaves.forEach(chave => {
+      const item = porZona[z][chave];
+      html += `<button class="local-botao" onclick="mostrarSecoesBairro('${z}', '${item.nome.replace(/'/g, "\\'")}', '${bairro.replace(/'/g, "\\'")}')">🏫 ${item.nome}</button>`;
+    });
+  });
+  div.innerHTML = html;
+}
+
+function mostrarSecoesBairro(zona, nomeLocal, bairro) {
+  const div = document.getElementById("resultadoBairro");
+  const registros = dados.filter(d => d.zonaNova === zona && d.local === nomeLocal);
+  if (registros.length === 0) { div.innerHTML = '<p class="erro">Nenhuma seção encontrada.</p>'; return; }
+  const endereco = registros[0].endereco;
+  const secoesUnicas = [...new Set(registros.map(r => r.secaoNova))].sort((a, b) => Number(a) - Number(b));
+  let html = `<button class="local-botao" onclick="mostrarLocaisDoBairroConsulta('${bairro.replace(/'/g, "\\'")}')" style="background:#f0f0f0;">← Voltar aos locais do bairro</button><div class="item"><p class="local-titulo">📍 ${nomeLocal}</p><p class="local-endereco"><strong>Endereço:</strong> ${endereco}</p><p><strong>Zona:</strong> ${zona} &nbsp;|&nbsp; <strong>Bairro:</strong> ${bairro}</p><p><strong>Seções (${secoesUnicas.length}):</strong></p><div class="secoes-lista">${secoesUnicas.map(s => `<span class="secao-tag">${s}</span>`).join("")}</div></div>`;
+  div.innerHTML = html;
+}
+</script>
+
+</body>
+</html>
