@@ -134,7 +134,7 @@ const URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTiHhCJ23TNCn4W
 
 const BAIRROS = [
   "Caju", "Catumbi", "Centro", "Cidade Nova", "Estácio", "Gamboa", "Glória",
-  "Ilha de Paquetá", "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde",
+  "Paquetá", "Ilha de Paquetá", "Lapa", "Rio Comprido", "Santa Teresa", "Santo Cristo", "Saúde",
   "Botafogo", "Catete", "Copacabana", "Cosme Velho", "Flamengo", "Gávea",
   "Humaitá", "Ipanema", "Jardim Botânico", "Lagoa", "Laranjeiras", "Leblon",
   "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal",
@@ -144,28 +144,32 @@ const BAIRROS = [
   "Cidade Universitária", "Cocotá", "Coelho Neto", "Colégio", "Complexo do Alemão",
   "Cordovil", "Costa Barros", "Del Castilho", "Encantado", "Engenheiro Leal",
   "Engenho da Rainha", "Engenho de Dentro", "Engenho Novo", "Freguesia",
-  "Galeão", "Grajaú", "Guadalupe", "Higienópolis", "Honório Gurgel", "Inhaúma",
-  "Irajá", "Jacaré", "Jacarezinho", "Jardim América", "Jardim Carioca",
-  "Jardim Guanabara", "Lins de Vasconcelos", "Madureira", "Mangueira",
-  "Manguinhos", "Maracanã", "Maré", "Marechal Hermes", "Maria da Graça",
-  "Méier", "Moneró", "Olaria", "Oswaldo Cruz", "Parada de Lucas",
-  "Parque Anchieta", "Parque Colúmbia", "Pavuna", "Penha", "Penha Circular",
-  "Piedade", "Pilares", "Pitangueiras", "Portuguesa", "Praça da Bandeira",
-  "Praia da Bandeira", "Quintino Bocaiúva", "Ramos", "Riachuelo", "Ribeira",
-  "Ricardo de Albuquerque", "Rocha", "Rocha Miranda", "Sampaio", "São Cristóvão",
-  "São Francisco Xavier", "Tauá", "Tijuca", "Todos os Santos", "Tomás Coelho",
-  "Turiaçu", "Vasco da Gama", "Vaz Lobo", "Vicente de Carvalho", "Vigário Geral",
-  "Vila da Penha", "Vila Isabel", "Vila Kosmos", "Vista Alegre", "Zumbi",
-  "Bangu", "Barra de Guaratiba", "Campo dos Afonsos", "Campo Grande", "Cosmos",
-  "Deodoro", "Gericinó", "Guaratiba", "Ilha de Guaratiba", "Inhoaíba", "Jabour",
-  "Jardim Sulacap", "Magalhães Bastos", "Paciência", "Padre Miguel",
-  "Pedra de Guaratiba", "Realengo", "Santa Cruz", "Santíssimo", "Senador Camará",
-  "Senador Vasconcelos", "Sepetiba", "Triagem", "Vila Kennedy", "Vila Militar",
+  "Fundão", "Galeão", "Grajaú", "Guadalupe", "Guarabu", "Higienópolis",
+  "Honório Gurgel", "Inhaúma", "Irajá", "Jacaré", "Jacarezinho", "Jardim América",
+  "Jardim Carioca", "Jardim Guanabara", "Lins de Vasconcelos", "Madureira",
+  "Mangueira", "Manguinhos", "Maracanã", "Maré", "Marechal Hermes",
+  "Maria da Graça", "Méier", "Moneró", "Olaria", "Oswaldo Cruz",
+  "Parada de Lucas", "Parque Anchieta", "Parque Colúmbia", "Pavuna", "Penha",
+  "Penha Circular", "Piedade", "Pilares", "Pitangueiras", "Portuguesa",
+  "Praça da Bandeira", "Praia da Bandeira", "Quintino Bocaiúva", "Ramos",
+  "Riachuelo", "Ribeira", "Ricardo de Albuquerque", "Rocha", "Rocha Miranda",
+  "Sampaio", "São Cristóvão", "São Francisco Xavier", "Tauá", "Tijuca",
+  "Todos os Santos", "Tomás Coelho", "Turiaçu", "Vasco da Gama", "Vaz Lobo",
+  "Vicente de Carvalho", "Vigário Geral", "Vila da Penha", "Vila Isabel",
+  "Vila Kosmos", "Vista Alegre", "Zumbi",
+  "Bangu", "Barra de Guaratiba", "Campo dos Afonsos", "Campo Grande", "Catiri",
+  "Cosmos", "Deodoro", "Gericinó", "Guaratiba", "Ilha de Guaratiba", "Inhoaíba",
+  "Jabour", "Jardim Sulacap", "Magalhães Bastos", "Paciência", "Padre Miguel",
+  "Pedra de Guaratiba", "Realengo", "Rio das Pedras", "Santa Cruz", "Santíssimo",
+  "Senador Camará", "Senador Vasconcelos", "Sepetiba", "Triagem", "Vila Kennedy",
+  "Vila Militar", "Augusto Vasconcelos",
   "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
-  "Curicica", "Freguesia de Jacarepaguá", "Freguesia JPA", "Gardênia Azul", "Jacarepaguá",
-  "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
+  "Curicica", "Freguesia de Jacarepaguá", "Freguesia JPA", "Gardênia Azul",
+  "Jacarepaguá", "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
   "Recreio", "Recreio dos Bandeirantes", "Bairro de Fátima", "Fátima",
-  "Tanque", "Taquara", "Vargem Grande", "Vargem Pequena", "Vila Valqueire"
+  "Tanque", "Taquara", "Tubiacanga", "Vargem Grande", "Vargem Pequena",
+  "Vila Valqueire", "Freguesia (Ilha do Governador)",
+  "Freguesia da Ilha do Governador", "São Jorge"
 ];
 
 const BAIRROS_ORDENADOS = [...BAIRROS].sort((a, b) => b.length - a.length);
@@ -192,9 +196,13 @@ function extrairBairro(endereco) {
   const enderecoSimp = simplificar(endereco);
   for (const bairro of BAIRROS_ORDENADOS) {
     if (enderecoSimp.endsWith(simplificar(bairro))) {
+      // Padroniza variações para o nome oficial
       if (bairro === "Recreio") return "Recreio dos Bandeirantes";
       if (bairro === "Fátima") return "Bairro de Fátima";
       if (bairro === "Freguesia JPA") return "Freguesia de Jacarepaguá";
+      if (bairro === "Ilha de Paquetá") return "Paquetá";
+      if (bairro === "Freguesia (Ilha do Governador)") return "Freguesia da Ilha do Governador";
+      if (bairro === "São Jorge") return "Campo Grande";
       return bairro;
     }
   }
