@@ -112,7 +112,7 @@ const BAIRROS = [
   "Pedra de Guaratiba", "Realengo", "Santa Cruz", "Santíssimo", "Senador Camará",
   "Senador Vasconcelos", "Sepetiba", "Vila Kennedy", "Vila Militar",
   "Anil", "Barra da Tijuca", "Barra Olímpica", "Camorim", "Cidade de Deus",
-  "Curicica", "Freguesia de Jacarepaguá", "Gardênia Azul", "Jacarepaguá",
+  "Curicica", "Freguesia de Jacarepaguá", "Freguesia JPA", "Gardênia Azul", "Jacarepaguá",
   "Grumari", "Itanhangá", "Joá", "Pechincha", "Praça Seca",
   "Recreio", "Recreio dos Bandeirantes", "Bairro de Fátima", "Fátima",
   "Tanque", "Taquara", "Vargem Grande", "Vargem Pequena", "Vila Valqueire"
@@ -143,6 +143,7 @@ function extrairBairro(endereco) {
       // Padroniza variações para o nome oficial
       if (bairro === "Recreio") return "Recreio dos Bandeirantes";
       if (bairro === "Fátima") return "Bairro de Fátima";
+      if (bairro === "Freguesia JPA") return "Freguesia de Jacarepaguá";
       return bairro;
     }
   }
