@@ -5,7 +5,7 @@
 // ⚙️ CONFIGURAÇÕES — edite aqui quando quiser
 const VERSAO_CACHE = "v1"; // aumente para "v2", "v3"... quando quiser forçar atualização
 const VALIDADE_HORAS = 24; // quantas horas o cache vale antes de tentar atualizar
-const DATA_LIMITE = new Date("2026-10-06T23:59:59").getTime(); // depois dessa data, sempre tenta atualizar
+const DATA_LIMITE = new Date("2026-10-26T23:59:59").getTime(); // depois dessa data, sempre tenta atualizar
 
 const NOME_CACHE = "votacao-" + VERSAO_CACHE;
 
